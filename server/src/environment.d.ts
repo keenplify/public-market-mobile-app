@@ -9,6 +9,9 @@ declare global {
       JET_LOGGER_FORMAT?: string;
       JWT_SECRET?: string;
       JWT_ALGORITHM?: string;
+      IMGBB_KEY?: string;
+
+      DATABASE_URL?: string;
     }
   }
 }

@@ -8,25 +8,26 @@ import { Router } from "express";
 import { body, param } from "express-validator";
 import bcrypt from "bcrypt";
 import logger from "@shared/Logger";
-import { send } from "process";
 
 const userRouter = Router();
 const prisma = new PrismaClient();
 
 userRouter.post(
   "/add",
-  body("email").isEmail(),
-  body("number").isString(),
-  body("password").isString().isLength({ min: 5 }),
-  body("gender").isString(),
-  body("type").isString(),
-  body("username").isString(),
+  body("email").not().isEmpty().isEmail(),
+  body("number").not().isEmpty().isString(),
+  body("password").not().isEmpty().isString().isLength({ min: 5 }),
+  body("gender").not().isEmpty().isString(),
+  body("type").not().isEmpty().isString(),
+  body("name").not().isEmpty().isString(),
+  body("username").not().isEmpty().isString(),
   sendValidationErrors,
   async (req, res) => {
     req.body;
     const user = await prisma.user.create({
       data: {
         email: req.body.email,
+        name: req.body.name,
         number: req.body.number,
         username: req.body.username,
         password: await bcrypt.hash(
@@ -39,7 +40,6 @@ userRouter.post(
     });
 
     if (user) {
-      logger.info(`User ${user.id} created.`);
       var token = createJWT(user);
       res.send({ message: "User successfully created.", token, user });
     }
@@ -103,6 +103,47 @@ userRouter.get(
     return res.send({
       message: "User found",
       user: dUser,
+    });
+  }
+);
+
+/*
+ * Admin can delete any user but user can only delete itself
+ */
+userRouter.delete(
+  "/:id",
+  authenticate,
+  param("id").isNumeric(),
+  async (req, res) => {
+    const user = req.user as User;
+
+    if (user.type === "ADMIN") {
+      prisma.user.delete({
+        where: {
+          id: Number.parseInt(req.params?.id),
+        },
+      });
+    }
+
+    const user2 = await prisma.user.findFirst({
+      where: {
+        id: Number.parseInt(req.params?.id),
+      },
+    });
+
+    if (user.id !== user2?.id)
+      return res.status(403).send({
+        message: "You have no privilege to delete user " + user2?.id,
+      });
+
+    await prisma.user.delete({
+      where: {
+        id: user.id,
+      },
+    });
+
+    return res.send({
+      message: "User deleted successfully.",
     });
   }
 );

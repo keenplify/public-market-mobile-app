@@ -13,10 +13,11 @@ import baseRouter from "./routes";
 import session from "express-session";
 
 // Start the server
+
 (async () => {
+  const app = express();
   const prisma = new PrismaClient();
 
-  const app = express();
   const { BAD_REQUEST } = StatusCodes;
 
   /************************************************************************************
@@ -40,7 +41,6 @@ import session from "express-session";
 
   // Prisma
   await prisma.$connect();
-  app.set("prisma", prisma);
 
   // Show routes called in console during development
   if (process.env.NODE_ENV === "development") {
@@ -77,6 +77,9 @@ import session from "express-session";
         const user = await prisma.user.findFirst({
           where: {
             id: payload.id,
+          },
+          include: {
+            address: true,
           },
         });
 

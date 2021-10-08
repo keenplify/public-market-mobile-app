@@ -13,8 +13,9 @@ generator client {
 model Image {
   id        Int     @id @default(autoincrement())
   url       String
-  product   Product @relation(fields: [productId], references: [id])
-  productId Int     @unique
+  thumbUrl  String
+  product   Product? @relation(fields: [productId], references: [id])
+  productId Int?     @unique
 }
 
 model Address {
@@ -45,6 +46,7 @@ model User {
   email    String    @unique
   number   String    @unique
   username String    @unique
+  name     String    
   password String
   gender   Genders   @default(MALE)
   type     UserTypes @default(CUSTOMER)
@@ -69,6 +71,7 @@ model Product {
   seller      User     @relation(fields: [sellerId], references: [id])
   sellerId    Int      @unique
   description String
+  price       String
   images      Image[]
   ratings     Rating[]
 }

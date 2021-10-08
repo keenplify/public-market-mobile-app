@@ -1,3 +1,9 @@
+-- CreateEnum
+CREATE TYPE "Genders" AS ENUM ('MALE', 'FEMALE');
+
+-- CreateEnum
+CREATE TYPE "UserTypes" AS ENUM ('ADMIN', 'CUSTOMER', 'SELLER');
+
 -- CreateTable
 CREATE TABLE "Image" (
     "id" SERIAL NOT NULL,
@@ -27,9 +33,10 @@ CREATE TABLE "User" (
     "email" TEXT NOT NULL,
     "number" TEXT NOT NULL,
     "username" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
     "password" TEXT NOT NULL,
-    "gender" TEXT NOT NULL,
-    "type" TEXT NOT NULL,
+    "gender" "Genders" NOT NULL DEFAULT E'MALE',
+    "type" "UserTypes" NOT NULL DEFAULT E'CUSTOMER',
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
 );
@@ -40,6 +47,7 @@ CREATE TABLE "Rating" (
     "text" TEXT NOT NULL,
     "userId" INTEGER NOT NULL,
     "productId" INTEGER NOT NULL,
+    "rating" INTEGER NOT NULL,
 
     CONSTRAINT "Rating_pkey" PRIMARY KEY ("id")
 );
