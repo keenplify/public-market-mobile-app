@@ -1,11 +1,13 @@
 import { PrismaClient, User } from ".prisma/client";
-import app from "@server";
-import { authenticate, sendValidationErrors } from "@shared/functions";
+import {
+  authenticate,
+  createJWT,
+  sendValidationErrors,
+} from "@shared/functions";
 import { Router } from "express";
 import { body, param } from "express-validator";
 import bcrypt from "bcrypt";
 import logger from "@shared/Logger";
-import jwt from "jsonwebtoken";
 import { send } from "process";
 
 const userRouter = Router();
@@ -38,7 +40,7 @@ userRouter.post(
 
     if (user) {
       logger.info(`User ${user.id} created.`);
-      var token = jwt.sign(user, process.env.JWT_SECRET!);
+      var token = createJWT(user);
       res.send({ message: "User successfully created.", token, user });
     }
   }
@@ -74,7 +76,7 @@ userRouter.post(
     if (!(await bcrypt.compare(req.body.password, user.password)))
       return res.send({ message: "Wrong password." });
 
-    var token = jwt.sign(user, process.env.JWT_SECRET!);
+    var token = createJWT(user);
     res.send({ message: "Successful", token, user });
   }
 );

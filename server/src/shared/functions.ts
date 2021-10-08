@@ -3,6 +3,7 @@ import { validationResult } from "express-validator";
 import { NextFunction, Request, Response } from "express";
 import passport from "passport";
 import { User } from ".prisma/client";
+import jwt from "jsonwebtoken";
 
 export const pErr = (err: Error) => {
   if (err) {
@@ -63,6 +64,11 @@ export const isSeller = (req: Request, res: Response) => {
     });
 };
 
+/**
+ *Creates JWT Token with user
+ */
+export const createJWT = (user: User) =>
+  jwt.sign(user, process.env.JWT_SECRET!);
 export const getRandomInt = () => {
   return Math.floor(Math.random() * 1_000_000_000_000);
 };
