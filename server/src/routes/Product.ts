@@ -86,4 +86,49 @@ router.put(
   }
 );
 
+router.delete(
+  "/:id",
+  param("id").isNumeric(),
+  sendValidationErrors,
+  authenticate,
+  async (req, res) => {
+    const user = req.user as User;
+
+    const product = await prisma.product.findFirst({
+      where: {
+        id: Number.parseInt(req.params.id),
+      },
+    });
+
+    if (!product) return res.status(404).send({ message: "Product not found" });
+
+    if (product.sellerId !== user.id && user.type !== "ADMIN")
+      return res.status(403).send({ message: "No permission" });
+
+    // Delete related images
+    await prisma.image.deleteMany({
+      where: {
+        productId: product.id,
+      },
+    });
+
+    // Delete related ratings
+    await prisma.rating.deleteMany({
+      where: {
+        productId: product.id,
+      },
+    });
+
+    const del = await prisma.product.delete({
+      where: {
+        id: product.id,
+      },
+    });
+
+    if (!del) return res.status(500).send({ message: "Unable to delete" });
+
+    return res.send({ message: "Product deleted successfully." });
+  }
+);
+
 export default router;
