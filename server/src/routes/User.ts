@@ -41,7 +41,7 @@ userRouter.post(
 
     if (user) {
       var token = createJWT(user);
-      res.send({ message: "User successfully created.", token, user });
+      res.send({ message: "Successfully created.", token, user });
     }
   }
 );
@@ -52,25 +52,26 @@ userRouter.get("/me", authenticate, async (req, res) => {
   const { password, ...dUser } = user;
 
   return res.send({
-    message: "User found",
+    message: "Success",
+    token: createJWT(user),
     user: dUser,
   });
 });
 
 userRouter.post(
   "/login",
-  body("username").isString(),
+  body("email").isString(),
   body("password").isString(),
   sendValidationErrors,
   async (req, res) => {
     const user = await prisma.user.findFirst({
       where: {
-        username: req.body.username,
+        email: req.body.email,
       },
     });
 
     if (!user) {
-      return res.send({ message: "User not found." });
+      return res.status(404).send({ message: "User not found." });
     }
 
     if (!(await bcrypt.compare(req.body.password, user.password)))
