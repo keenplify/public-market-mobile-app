@@ -5,9 +5,7 @@ import { useQuery } from "react-query";
 import { RootStackParamList } from "../App";
 import { MeQuery } from "../queries/users/me";
 
-export const useAuth = (
-  props?: NativeStackScreenProps<RootStackParamList, any>
-) => {
+export const useAuth = (props?: any) => {
   const query = useQuery("check", async () => await MeQuery());
 
   useEffect(() => {
@@ -30,11 +28,8 @@ export const useAuth = (
   return { ...query, logout, setToken };
 };
 
-export const useUserQuery = (token: string) => {
-  const query = useQuery(
-    "user",
-    async () => await MeQuery().then((res) => res?.user)
-  );
+export const useUserQuery = (token?: string) => {
+  const query = useQuery("user", async () => await MeQuery());
 
   useEffect(() => {
     query.refetch();

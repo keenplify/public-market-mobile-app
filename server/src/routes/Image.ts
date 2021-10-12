@@ -5,9 +5,12 @@ import { Router } from "express";
 import { body, param, query } from "express-validator";
 import ImgbbClient from "imgbb";
 import multer, { memoryStorage } from "multer";
+//@ts-ignore
+import FreeImageJS from "freeimage.js";
 
 const router = Router();
 const prisma = new PrismaClient();
+
 const upload = multer({
   storage: memoryStorage(),
   limits: {
@@ -32,42 +35,63 @@ let imgbbClient = new ImgbbClient({
   token: process.env.IMGBB_KEY!,
 });
 
+const fihClient = new FreeImageJS({
+  key: process.env.FIH_KEY,
+});
+
 router.post(
   "/add",
   authenticate,
-  query("productId").isNumeric(),
+  query("productId").optional().isNumeric(),
   sendValidationErrors,
   upload.single("image"),
   async (req, res) => {
     const user = req.user as User;
-    console.log(req.query);
+    let extracted;
+
+    if (!req.file) return res.status(403).send({ message: "Invalid image!" });
+
     try {
-      if (!req.file) return res.status(403).send({ message: "Invalid image!" });
-      const imgbb = await imgbbClient.upload({
-        image: req.file?.buffer,
-      });
-
-      if (!imgbb.success)
-        return res
-          .status(500)
-          .send({ message: "Unable to upload to hosting!" });
-
-      const image = await prisma.image.create({
-        data: {
+      const fih = await fihClient.upload(
+        Buffer.from(req.file.buffer).toString("base64")
+      );
+      extracted = {
+        url: fih.data.image.url,
+        thumbUrl: fih.data.thumb.url,
+        success: fih.success,
+      };
+    } catch (error1) {
+      console.log({ message: "Adding Image Failed!", error1 });
+      try {
+        const imgbb = await imgbbClient.upload({
+          image: req.file?.buffer,
+        });
+        extracted = {
           url: imgbb.data.url,
           thumbUrl: imgbb.data.thumb.url,
-          ownerId: user.id,
-          productId: req.query.productId
-            ? Number.parseInt(req.query.productId as any)
-            : undefined,
-        },
-      });
-
-      res.send({ message: "Successful", imgbb, image });
-    } catch (error) {
-      logger.warn({ message: "Adding Image Failed!", error });
-      res.status(500).send(error);
+          success: imgbb.success,
+        };
+      } catch (error2) {
+        console.log({ message: "Adding Image Failed!", error2 });
+        res.status(500).send({ error1, error2 });
+      }
     }
+
+    if (!extracted?.success)
+      return res.status(500).send({ message: "Unable to upload to hosting!" });
+
+    const image = await prisma.image.create({
+      data: {
+        url: extracted.url,
+        thumbUrl: extracted.thumbUrl,
+        ownerId: user.id,
+        productId: req.query.productId
+          ? Number.parseInt(req.query.productId as any)
+          : undefined,
+      },
+    });
+    console.log(image);
+    res.send({ message: "Successful", image });
   }
 );
 

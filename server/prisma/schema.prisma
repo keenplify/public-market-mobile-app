@@ -15,7 +15,7 @@ model Image {
   url       String
   thumbUrl  String
   product   Product?  @relation(fields: [productId], references: [id])
-  productId Int?      @unique
+  productId Int?      
   owner     User      @relation(fields: [ownerId], references: [id])
   ownerId   Int
   createdAt DateTime  @default(now())
@@ -51,8 +51,7 @@ model User {
   id       Int       @id @default(autoincrement())
   email    String    @unique
   number   String    @unique
-  username String    @unique
-  name     String    
+  username String    @unique 
   password String
   gender   Genders   @default(MALE)
   type     UserTypes @default(CUSTOMER)
@@ -80,7 +79,7 @@ model Product {
   id          Int      @id @default(autoincrement())
   name        String
   seller      User     @relation(fields: [sellerId], references: [id])
-  sellerId    Int      @unique
+  sellerId    Int     
   description String
   price       String
   images      Image[]

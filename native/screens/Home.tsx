@@ -1,7 +1,6 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import React, { useEffect } from "react";
-import { Image, Text, View } from "react-native";
-import { Button } from "native-base";
+import { Button, Heading, Image, VStack, Text } from "native-base";
 import { SafeAreaInsetsContext } from "react-native-safe-area-context";
 import { RootStackParamList } from "../App";
 import { useAuth } from "../helpers/auth";
@@ -15,29 +14,38 @@ export function HomeComponent(props: Props) {
 
     if (!data.message.includes("Success")) return logout();
 
-    props.navigation.replace("Customer Dashboard");
+    if (data.user.type === "CUSTOMER")
+      return props.navigation.replace("Customer Dashboard");
+    else if (data.user.type === "SELLER")
+      return props.navigation.replace("Seller Dashboard");
   }, [data]);
 
   return (
     <SafeAreaInsetsContext.Consumer>
       {(insets) => (
-        <View
+        <VStack
           style={{
             paddingTop: insets.top,
             flex: 1,
             alignItems: "center",
             justifyContent: "center",
           }}
+          space={4}
         >
           <Image
-            source={require("../assets/icon.png")}
-            style={{ width: 128, height: 128, marginBottom: 24 }}
+            source={require("../assets/landing-1.png")}
+            style={{
+              height: 254,
+              marginBottom: 24,
+            }}
+            alt="A girl purchasing things online"
           />
-          <Text>test</Text>
-          <Button onPress={() => props.navigation.push("Login")}>
-            Email Address
+          <Heading>Welcome to Public Market!</Heading>
+          <Text>Where you can buy and sell goods and products</Text>
+          <Button onPress={() => props.navigation.push("Login")} w="50%">
+            Sign In
           </Button>
-        </View>
+        </VStack>
       )}
     </SafeAreaInsetsContext.Consumer>
   );

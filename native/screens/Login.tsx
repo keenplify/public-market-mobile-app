@@ -1,15 +1,28 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import React, { useState } from "react";
-import { Box, Button, Input, Spacer, Text, useToast } from "native-base";
-import { SafeAreaInsetsContext } from "react-native-safe-area-context";
+import {
+  Box,
+  Button,
+  Center,
+  Flex,
+  FormControl,
+  HStack,
+  Icon,
+  Input,
+  Text,
+  useToast,
+  VStack,
+} from "native-base";
 import { RootStackParamList } from "../App";
 import { Formik } from "formik";
 import { Ionicons } from "@expo/vector-icons";
 import * as yup from "yup";
 import { capitalizeFirstLetter } from "../helpers/string";
-import { Badge } from "native-base";
+import { Badge, Heading } from "native-base";
 import { LoginQuery } from "../queries/users/login";
 import { useAuth } from "../helpers/auth";
+import { Feather } from "@expo/vector-icons";
+
 type Props = NativeStackScreenProps<RootStackParamList, "Login">;
 
 const schema = yup.object().shape({
@@ -23,104 +36,142 @@ export function LoginComponent(props: Props) {
   const toast = useToast();
 
   return (
-    <SafeAreaInsetsContext.Consumer>
-      {(insets) => (
-        <Box
-          pt={insets.top}
-          flex={1}
-          alignItems="center"
-          justifyContent="center"
-        >
-          <Text mb={3} fontSize={32} fontWeight="bold">
-            Login
-          </Text>
-          <Formik
-            initialValues={{ email: "", password: "" }}
-            onSubmit={async ({ email, password }, actions) => {
-              toast.show({ description: "Logging in..." });
-              const result = await LoginQuery(email, password);
+    <Flex flexGrow={1} alignItems="center" justifyContent="center">
+      <Formik
+        initialValues={{ email: "", password: "" }}
+        onSubmit={async ({ email, password }, actions) => {
+          toast.show({ description: "Logging in..." });
+          const result = await LoginQuery(email, password);
 
-              if (!result.message?.includes("Success"))
-                actions.setStatus(result.message);
-              else {
-                setToken(result.token);
-                toast.show({ description: "Login Successful." });
-                props.navigation.goBack();
-              }
-            }}
-            validationSchema={schema}
+          if (!result.message?.includes("Success"))
+            actions.setStatus(result.message);
+          else {
+            setToken(result.token);
+            toast.show({ description: "Login Successful." });
+            props.navigation.goBack();
+          }
+        }}
+        validationSchema={schema}
+      >
+        {({
+          handleChange,
+          handleBlur,
+          handleSubmit,
+          values,
+          isSubmitting,
+          isValid,
+          errors,
+          status,
+        }) => (
+          <VStack
+            flexGrow={1}
+            alignItems="center"
+            justifyContent="center"
+            w="100%"
           >
-            {({
-              handleChange,
-              handleBlur,
-              handleSubmit,
-              values,
-              isSubmitting,
-              isValid,
-              errors,
-              status,
-            }) => (
-              <Box w="80%">
+            <Flex bgColor="white" w="90%" p={5} rounded={1} shadow={5}>
+              <Heading textAlign="center" mb={4}>
+                Login
+              </Heading>
+
+              <VStack mx={3} space={4}>
                 {status && (
                   <Badge colorScheme="danger" px={4} _text={{ fontSize: 16 }}>
                     {capitalizeFirstLetter(status)}
                   </Badge>
                 )}
-                <Input
-                  placeholder="Email"
-                  onChangeText={handleChange("email")}
-                  onBlur={handleBlur("email")}
-                  value={values.email}
-                  fontSize={16}
-                />
-                {errors.email && (
-                  <Badge colorScheme="danger">
-                    {capitalizeFirstLetter(errors.email + ".")}
-                  </Badge>
-                )}
-                <Spacer mb={4} />
-                <Input
-                  placeholder="Password"
-                  onChangeText={handleChange("password")}
-                  onBlur={handleBlur("password")}
-                  value={values.password}
-                  type={showPassword ? "text" : "password"}
-                  fontSize={16}
-                  InputRightElement={
-                    <Button
-                      roundedLeft={0}
-                      onPress={() => setShowPassword(!showPassword)}
-                      bg="rgba(255,255,255,0)"
-                      _pressed={{
-                        bg: "rgba(255,255,255,0)",
-                      }}
-                    >
-                      {showPassword ? (
-                        <Ionicons name="eye-off" size={24} color="black" />
-                      ) : (
-                        <Ionicons name="eye" size={24} color="black" />
-                      )}
-                    </Button>
-                  }
-                />
+                <FormControl>
+                  <Input
+                    placeholder="Email"
+                    onChangeText={handleChange("email")}
+                    onBlur={handleBlur("email")}
+                    value={values.email}
+                    fontSize={16}
+                    InputLeftElement={
+                      <Icon
+                        as={<Feather name="user" size={24} color="black" />}
+                        size={5}
+                        ml={2}
+                        color="muted.500"
+                      />
+                    }
+                  />
+                  {errors.email && (
+                    <Badge colorScheme="danger">
+                      {capitalizeFirstLetter(errors.email + ".")}
+                    </Badge>
+                  )}
+                </FormControl>
 
-                {errors.password && (
-                  <Badge colorScheme="danger">
-                    {capitalizeFirstLetter(errors.password + ".")}
-                  </Badge>
-                )}
-                <Spacer mb={4} />
+                <FormControl>
+                  <Input
+                    placeholder="Password"
+                    onChangeText={handleChange("password")}
+                    onBlur={handleBlur("password")}
+                    value={values.password}
+                    type={showPassword ? "text" : "password"}
+                    fontSize={16}
+                    InputRightElement={
+                      <Button
+                        roundedLeft={0}
+                        onPress={() => setShowPassword(!showPassword)}
+                        bg="rgba(255,255,255,0)"
+                        _pressed={{
+                          bg: "rgba(255,255,255,0)",
+                        }}
+                      >
+                        {showPassword ? (
+                          <Ionicons name="eye-off" size={24} color="black" />
+                        ) : (
+                          <Ionicons name="eye" size={24} color="black" />
+                        )}
+                      </Button>
+                    }
+                    InputLeftElement={
+                      <Icon
+                        as={<Feather name="lock" size={24} color="black" />}
+                        size={5}
+                        ml={2}
+                        color="muted.500"
+                      />
+                    }
+                  />
+
+                  {errors.password && (
+                    <Badge colorScheme="danger">
+                      {capitalizeFirstLetter(errors.password + ".")}
+                    </Badge>
+                  )}
+                </FormControl>
                 <Button
                   onPress={() => handleSubmit()}
                   disabled={isSubmitting || !isValid}
                 >
-                  Login
+                  Submit
                 </Button>
-              </Box>
-            )}
-          </Formik>
-        </Box>
-      )}
-    </SafeAreaInsetsContext.Consumer>
+              </VStack>
+            </Flex>
+            <HStack mt={4}>
+              <Center>
+                <Text>Dont have an account?</Text>
+              </Center>
+              <Center ml={4}>
+                <Button
+                  onPress={() => props.navigation.navigate("Register")}
+                  disabled={isSubmitting}
+                  colorScheme="green"
+                  px={5}
+                  _text={{
+                    fontWeight: "bold",
+                  }}
+                >
+                  Register
+                </Button>
+              </Center>
+            </HStack>
+          </VStack>
+        )}
+      </Formik>
+    </Flex>
   );
 }

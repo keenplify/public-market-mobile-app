@@ -1,17 +1,17 @@
 import { PrismaClient, User } from ".prisma/client";
 import { authenticate, sendValidationErrors } from "@shared/functions";
 import { Router } from "express";
-import { body, check, param } from "express-validator";
+import { body, check, param, query } from "express-validator";
 
 const router = Router();
 const prisma = new PrismaClient();
 
 router.post(
   "/add",
-  body("name").not().isEmpty().isString(),
-  body("description").not().isEmpty().isString(),
+  body("name").isString().notEmpty(),
+  body("description").isString().notEmpty(),
   body("images").isArray(),
-  body("price").not().isEmpty().isString(),
+  body("price").isNumeric().notEmpty(),
   sendValidationErrors,
   authenticate,
   async (req, res) => {
@@ -22,15 +22,114 @@ router.post(
         name: req.body.name,
         sellerId: user.id,
         description: req.body.description,
-        images: req.body.images.length > 0 ? req.body.images : undefined,
+        // images: req.body.images.length > 0 ? req.body.images : undefined,
         price: req.body.price,
       },
     });
-
     if (!product)
       return res.status(400).send({ message: "Unable to create product." });
 
+    req.body.images &&
+      req.body.images.forEach(async (imgId: number) => {
+        const change = await prisma.image.update({
+          where: {
+            id: imgId,
+          },
+          data: {
+            productId: product.id,
+          },
+        });
+
+        console.log(change);
+      });
+
     return res.send({ message: "Success", product });
+  }
+);
+
+router.get(
+  "/paginate",
+  query("skip").isNumeric(),
+  query("take").isNumeric(),
+  sendValidationErrors,
+  authenticate,
+  async (req, res) => {
+    const products = await prisma.product.findMany({
+      take: Number.parseInt(req.query.take as string),
+      skip: Number.parseInt(req.query.skip as string),
+      orderBy: {
+        id: "desc",
+      },
+    });
+    const count = await prisma.product.count();
+
+    return res.send({ message: "Success", products, count });
+  }
+);
+
+router.get(
+  "/cursorpaginate",
+  query("cursor").optional().isNumeric(),
+  sendValidationErrors,
+  authenticate,
+  async (req, res) => {
+    let user = req.user as User;
+    let cursor = Number.parseInt(req.query.cursor as string);
+    let sellerId;
+
+    if (user.type === "SELLER") sellerId = user.id;
+    if (!req.query.cursor) {
+      const last = await prisma.product.findMany({
+        where: sellerId
+          ? {
+              sellerId,
+            }
+          : undefined,
+        take: 1,
+        orderBy: { createdAt: "desc" },
+      });
+
+      //Check if any product found
+      if (last.length === 0)
+        return res.send({
+          message: "No products found",
+          products: {},
+          count: 0,
+          nextId: false,
+        });
+
+      cursor = last[0].id;
+    }
+
+    const products = await prisma.product.findMany({
+      take: 6,
+      skip: 1,
+      cursor: {
+        id: cursor,
+      },
+      orderBy: {
+        id: "desc",
+      },
+      include: {
+        images: true,
+        seller: true,
+        ratings: true,
+      },
+    });
+
+    const count = await prisma.product.count();
+
+    if (products.length === 0)
+      return res.send({ message: "Success", products, count, nextId: false });
+
+    const nextId = products[products.length - 1].id;
+
+    return res.send({
+      message: "Success",
+      products,
+      count,
+      nextId,
+    });
   }
 );
 

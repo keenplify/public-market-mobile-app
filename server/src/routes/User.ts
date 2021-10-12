@@ -4,10 +4,10 @@ import {
   createJWT,
   sendValidationErrors,
 } from "@shared/functions";
-import { Router } from "express";
+import e, { Router } from "express";
 import { body, param } from "express-validator";
 import bcrypt from "bcrypt";
-import logger from "@shared/Logger";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime";
 
 const userRouter = Router();
 const prisma = new PrismaClient();
@@ -19,29 +19,30 @@ userRouter.post(
   body("password").not().isEmpty().isString().isLength({ min: 5 }),
   body("gender").not().isEmpty().isString(),
   body("type").not().isEmpty().isString(),
-  body("name").not().isEmpty().isString(),
   body("username").not().isEmpty().isString(),
   sendValidationErrors,
   async (req, res) => {
-    req.body;
-    const user = await prisma.user.create({
-      data: {
-        email: req.body.email,
-        name: req.body.name,
-        number: req.body.number,
-        username: req.body.username,
-        password: await bcrypt.hash(
-          req.body.password,
-          await bcrypt.genSalt(10)
-        ),
-        gender: req.body.gender,
-        type: req.body.type,
-      },
-    });
+    try {
+      const user = await prisma.user.create({
+        data: {
+          email: req.body.email,
+          number: req.body.number,
+          username: req.body.username,
+          password: await bcrypt.hash(
+            req.body.password,
+            await bcrypt.genSalt(10)
+          ),
+          gender: req.body.gender,
+          type: req.body.type,
+        },
+      });
 
-    if (user) {
-      var token = createJWT(user);
-      res.send({ message: "Successfully created.", token, user });
+      if (user) {
+        var token = createJWT(user);
+        return res.send({ message: "Successfully created.", token, user });
+      }
+    } catch (err: any) {
+      res.send({ message: "Error", error: err });
     }
   }
 );

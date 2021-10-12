@@ -11,6 +11,8 @@ declare global {
       JWT_ALGORITHM?: string;
       IMGBB_KEY?: string;
 
+      FIH_KEY?: string;
+
       DATABASE_URL?: string;
     }
   }
