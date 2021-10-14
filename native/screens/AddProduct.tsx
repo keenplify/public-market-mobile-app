@@ -21,6 +21,7 @@ import Carousel from "react-native-snap-carousel";
 import { Image as IImage } from "../helpers/types";
 import { Dimensions } from "react-native";
 import { AddProductQuery } from "../queries/products/add";
+import { serveImageURI } from "../helpers/string";
 
 const { width: screenWidth } = Dimensions.get("window");
 
@@ -70,7 +71,7 @@ export function AddProduct(props: Props) {
                 renderItem={({ item, index }) => (
                   <Box shadow={3} bgColor="rgb(255,255,255)" key={index}>
                     <Image
-                      source={{ uri: item.url }}
+                      source={serveImageURI(item.thumbUrl)}
                       alt="Preview"
                       w="100%"
                       style={{ aspectRatio: 1 }}

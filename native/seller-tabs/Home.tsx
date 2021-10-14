@@ -61,17 +61,7 @@ export type SellerHomeMainProps = NativeStackScreenProps<
 >;
 
 function MainScreen(props: SellerHomeMainProps) {
-  return (
-    <SafeAreaView>
-      <ScrollView>
-        <VStack>
-          <Flex alignItems="center" mt={1} mb={2}>
-            <ProductsLayout {...props} />
-          </Flex>
-        </VStack>
-      </ScrollView>
-    </SafeAreaView>
-  );
+  return <ProductsLayout {...props} />;
 }
 
 export type SellerHomeStackParamsList = {

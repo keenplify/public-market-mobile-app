@@ -41,8 +41,10 @@ export function ProductImageUploader({ onUpload }: Props) {
       quality: 1,
     });
 
-    if (result.cancelled === true)
+    if (result.cancelled === true) {
+      setIsUploading(false);
       return toast.show({ description: "Picking image is cancelled." });
+    }
     const formData = new FormData();
 
     formData.append("image", {

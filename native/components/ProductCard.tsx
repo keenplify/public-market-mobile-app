@@ -1,43 +1,82 @@
-import { Box, Flex, HStack, Image, Spinner, VStack } from "native-base";
+import { Flex, Text, Image, VStack, Heading, HStack } from "native-base";
 import React from "react";
-import { Text, TouchableOpacity } from "react-native";
+import { TouchableOpacity } from "react-native";
 import { Product } from "../helpers/types";
 import { AntDesign } from "@expo/vector-icons";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import {
+  capitalizeFirstLetter,
+  isValidHttpUrl,
+  moneySign,
+  PRIMARY_COLOR,
+  serveImageURI,
+  SERVER_API,
+} from "../helpers/string";
+import { Rating } from "react-native-ratings";
 
 interface Props extends NativeStackScreenProps<any> {
   product: Product;
 }
 
 export function ProductCard({ product, ...props }: Props) {
+  const firstImage =
+    typeof product.images === "object" ? product.images[0] : undefined;
   return (
     <Flex
       rounded="lg"
       overflow="hidden"
       shadow={1}
       bgColor="white"
-      p={2}
+      p={3}
       m="1%"
       width="48%"
     >
       <TouchableOpacity
         onPress={() => props.navigation.navigate("Product", { product })}
+        style={{
+          flex: 1,
+        }}
       >
-        {product.images[0] ? (
-          <Image
-            source={{ uri: product.images[0].thumbUrl }}
-            w="100%"
-            style={{ aspectRatio: 1, backgroundColor: "white" }}
-            alt={`${product.name} preview`}
-          />
-        ) : (
-          <Flex alignItems="center" p={8}>
-            <AntDesign name="question" size={64} color="black" />
+        <VStack>
+          <Flex
+            alignItems="center"
+            justifyContent="center"
+            style={{ aspectRatio: 1 }}
+            borderRadius={3}
+            bgColor={PRIMARY_COLOR + "11"}
+          >
+            {typeof firstImage === "object" ? (
+              <Image
+                source={serveImageURI(firstImage.thumbUrl)}
+                style={{ aspectRatio: 1, backgroundColor: "white" }}
+                alt={`${product.name} preview`}
+                w="100%"
+                borderRadius={3}
+              />
+            ) : (
+              <Flex>
+                <AntDesign name="question" size={64} color="black" />
+              </Flex>
+            )}
           </Flex>
-        )}
-
-        <Text>{product.name}</Text>
-        <Text>{product.id}</Text>
+          <Heading fontSize="md" numberOfLines={1} ellipsizeMode="tail">
+            {capitalizeFirstLetter(product.name)}
+          </Heading>
+          <Text color={PRIMARY_COLOR} bold>
+            {moneySign}
+            <Text color={PRIMARY_COLOR} bold fontSize="xl">
+              {product.price}
+            </Text>
+          </Text>
+          <Flex alignSelf="flex-end">
+            <Rating
+              ratingCount={5}
+              imageSize={16}
+              ratingColor={PRIMARY_COLOR}
+              readonly
+            />
+          </Flex>
+        </VStack>
       </TouchableOpacity>
     </Flex>
   );

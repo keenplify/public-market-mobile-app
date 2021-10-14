@@ -55,6 +55,9 @@ import session from "express-session";
   // Add APIs
   app.use("/api", baseRouter);
 
+  // Add Static
+  app.use("/static", express.static("static"));
+
   // Print API errors
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   app.use((err: Error, req: Request, res: Response, next: NextFunction) => {

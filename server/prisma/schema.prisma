@@ -81,7 +81,7 @@ model Product {
   seller      User     @relation(fields: [sellerId], references: [id])
   sellerId    Int     
   description String
-  price       String
+  price       Int
   images      Image[]
   ratings     Rating[]
   createdAt DateTime @default(now())

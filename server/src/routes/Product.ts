@@ -1,4 +1,4 @@
-import { PrismaClient, User } from ".prisma/client";
+import { PrismaClient, Product, User } from ".prisma/client";
 import { authenticate, sendValidationErrors } from "@shared/functions";
 import { Router } from "express";
 import { body, check, param, query } from "express-validator";
@@ -22,8 +22,7 @@ router.post(
         name: req.body.name,
         sellerId: user.id,
         description: req.body.description,
-        // images: req.body.images.length > 0 ? req.body.images : undefined,
-        price: req.body.price,
+        price: Number.parseInt(req.body.price),
       },
     });
     if (!product)
@@ -31,7 +30,7 @@ router.post(
 
     req.body.images &&
       req.body.images.forEach(async (imgId: number) => {
-        const change = await prisma.image.update({
+        await prisma.image.update({
           where: {
             id: imgId,
           },
@@ -39,33 +38,31 @@ router.post(
             productId: product.id,
           },
         });
-
-        console.log(change);
       });
 
     return res.send({ message: "Success", product });
   }
 );
 
-router.get(
-  "/paginate",
-  query("skip").isNumeric(),
-  query("take").isNumeric(),
-  sendValidationErrors,
-  authenticate,
-  async (req, res) => {
-    const products = await prisma.product.findMany({
-      take: Number.parseInt(req.query.take as string),
-      skip: Number.parseInt(req.query.skip as string),
-      orderBy: {
-        id: "desc",
-      },
-    });
-    const count = await prisma.product.count();
+// router.get(
+//   "/paginate",
+//   query("skip").isNumeric(),
+//   query("take").isNumeric(),
+//   sendValidationErrors,
+//   authenticate,
+//   async (req, res) => {
+//     const products = await prisma.product.findMany({
+//       take: Number.parseInt(req.query.take as string),
+//       skip: Number.parseInt(req.query.skip as string),
+//       orderBy: {
+//         id: "desc",
+//       },
+//     });
+//     const count = await prisma.product.count();
 
-    return res.send({ message: "Success", products, count });
-  }
-);
+//     return res.send({ message: "Success", products, count });
+//   }
+// );
 
 router.get(
   "/cursorpaginate",
@@ -76,10 +73,11 @@ router.get(
     let user = req.user as User;
     let cursor = Number.parseInt(req.query.cursor as string);
     let sellerId;
+    let last: Product[] = [];
 
     if (user.type === "SELLER") sellerId = user.id;
     if (!req.query.cursor) {
-      const last = await prisma.product.findMany({
+      last = await prisma.product.findMany({
         where: sellerId
           ? {
               sellerId,
@@ -93,7 +91,7 @@ router.get(
       if (last.length === 0)
         return res.send({
           message: "No products found",
-          products: {},
+          products: [],
           count: 0,
           nextId: false,
         });
@@ -120,13 +118,18 @@ router.get(
     const count = await prisma.product.count();
 
     if (products.length === 0)
-      return res.send({ message: "Success", products, count, nextId: false });
+      return res.send({
+        message: "Success",
+        products: [...last, ...products],
+        count,
+        nextId: false,
+      });
 
     const nextId = products[products.length - 1].id;
 
     return res.send({
       message: "Success",
-      products,
+      products: [...last, ...products],
       count,
       nextId,
     });
