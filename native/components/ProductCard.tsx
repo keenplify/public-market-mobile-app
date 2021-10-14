@@ -1,5 +1,5 @@
 import { Flex, Text, Image, VStack, Heading, HStack } from "native-base";
-import React from "react";
+import React, { useState } from "react";
 import { TouchableOpacity } from "react-native";
 import { Product } from "../helpers/types";
 import { AntDesign } from "@expo/vector-icons";
@@ -16,11 +16,14 @@ import { Rating } from "react-native-ratings";
 
 interface Props extends NativeStackScreenProps<any> {
   product: Product;
+  key: number;
 }
 
 export function ProductCard({ product, ...props }: Props) {
-  const firstImage =
-    typeof product.images === "object" ? product.images[0] : undefined;
+  const [firstImage] = useState(
+    typeof product.images === "object" ? product.images[0] : null
+  );
+
   return (
     <Flex
       rounded="lg"
@@ -52,6 +55,7 @@ export function ProductCard({ product, ...props }: Props) {
                 alt={`${product.name} preview`}
                 w="100%"
                 borderRadius={3}
+                key={props.key}
               />
             ) : (
               <Flex>

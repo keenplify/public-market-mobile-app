@@ -1,4 +1,4 @@
-import { PrismaClient, Product, User } from ".prisma/client";
+import { Image, Prisma, PrismaClient, Product, User } from ".prisma/client";
 import { authenticate, sendValidationErrors } from "@shared/functions";
 import { Router } from "express";
 import { body, check, param, query } from "express-validator";
@@ -28,17 +28,23 @@ router.post(
     if (!product)
       return res.status(400).send({ message: "Unable to create product." });
 
+    const promises: Prisma.Prisma__ImageClient<Image>[] = [];
+
     req.body.images &&
       req.body.images.forEach(async (imgId: number) => {
-        await prisma.image.update({
-          where: {
-            id: imgId,
-          },
-          data: {
-            productId: product.id,
-          },
-        });
+        promises.push(
+          prisma.image.update({
+            where: {
+              id: imgId,
+            },
+            data: {
+              productId: product.id,
+            },
+          })
+        );
       });
+
+    await Promise.all(promises);
 
     return res.send({ message: "Success", product });
   }
@@ -84,6 +90,11 @@ router.get(
             }
           : undefined,
         take: 1,
+        include: {
+          images: true,
+          seller: true,
+          ratings: true,
+        },
         orderBy: { createdAt: "desc" },
       });
 

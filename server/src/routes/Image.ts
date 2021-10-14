@@ -89,7 +89,7 @@ router.post(
       data: {
         // url: extracted.url,
         // thumbUrl: extracted.thumbUrl,
-        url: req.file.path,
+        url: __dirname + "/" + req.file.path,
         thumbUrl: req.file.path,
         ownerId: user.id,
         productId: req.query.productId
@@ -97,7 +97,7 @@ router.post(
           : undefined,
       },
     });
-    console.log(image);
+
     res.send({ message: "Successful", image });
   }
 );
