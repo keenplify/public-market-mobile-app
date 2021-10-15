@@ -20,6 +20,14 @@ import { ProductsCursorPaginateQuery } from "../queries/products/cursorpaginate"
 import { SellerHomeMainProps } from "../seller-tabs/Home";
 import { ProductCard } from "./ProductCard";
 
+const isCloseToBottom = ({ layoutMeasurement, contentOffset, contentSize }) => {
+  const paddingToBottom = 40;
+  return (
+    layoutMeasurement.height + contentOffset.y >=
+    contentSize.height - paddingToBottom
+  );
+};
+
 export function ProductsLayout(
   props: CustomerHomeMainProps | SellerHomeMainProps
 ) {
@@ -33,7 +41,7 @@ export function ProductsLayout(
     );
 
   useEffect(() => {
-    refetch();
+    props.navigation.addListener("focus", () => refetch());
   }, []);
 
   return (
@@ -42,17 +50,26 @@ export function ProductsLayout(
       refreshControl={
         <RefreshControl refreshing={isFetching} onRefresh={refetch} />
       }
+      onScroll={({ nativeEvent }) => {
+        if (isCloseToBottom(nativeEvent) && hasNextPage) {
+          fetchNextPage();
+        }
+      }}
     >
       <Flex flexDirection="column" flexGrow={1} mx={1}>
         <Flex flexWrap="wrap" flexDirection="row" w="100%">
           {isFetched ? (
-            data.pages.map((_data, key) =>
+            data.pages.map((_data, key1) =>
               _data.count > 0 ? (
-                _data.products.map((product, key) => (
-                  <ProductCard product={product} key={key} {...props} />
+                _data.products.map((product, key2) => (
+                  <ProductCard
+                    product={product}
+                    key={`${key1}${key2}`}
+                    {...props}
+                  />
                 ))
               ) : (
-                <Text key={key}>No products found.</Text>
+                <Text key={key1}>No products found.</Text>
               )
             )
           ) : (
@@ -61,13 +78,6 @@ export function ProductsLayout(
             </Flex>
           )}
         </Flex>
-        {hasNextPage && (
-          <Flex mt={2} mx={2}>
-            <Button onPress={() => fetchNextPage()}>
-              {hasNextPage ? "Load More..." : "No more products to show."}
-            </Button>
-          </Flex>
-        )}
       </Flex>
     </ScrollView>
   );

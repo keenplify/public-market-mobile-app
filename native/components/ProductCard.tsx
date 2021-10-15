@@ -16,14 +16,9 @@ import { Rating } from "react-native-ratings";
 
 interface Props extends NativeStackScreenProps<any> {
   product: Product;
-  key: number;
 }
 
 export function ProductCard({ product, ...props }: Props) {
-  const [firstImage] = useState(
-    typeof product.images === "object" ? product.images[0] : null
-  );
-
   return (
     <Flex
       rounded="lg"
@@ -48,14 +43,15 @@ export function ProductCard({ product, ...props }: Props) {
             borderRadius={3}
             bgColor={PRIMARY_COLOR + "11"}
           >
-            {typeof firstImage === "object" ? (
+            {typeof product?.images === "object" &&
+            typeof product?.images[0] === "object" ? (
               <Image
-                source={serveImageURI(firstImage.thumbUrl)}
+                source={serveImageURI(product.images[0].thumbUrl)}
                 style={{ aspectRatio: 1, backgroundColor: "white" }}
                 alt={`${product.name} preview`}
                 w="100%"
                 borderRadius={3}
-                key={props.key}
+                key={product.id}
               />
             ) : (
               <Flex>

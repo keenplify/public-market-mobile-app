@@ -5,6 +5,7 @@ import { RootStackParamList } from "../App";
 import { useAuth } from "../helpers/auth";
 import { HomeSellerTab } from "../seller-tabs/Home";
 import { Feather } from "@expo/vector-icons";
+import { ProfileSellerTab } from "../seller-tabs/Profile";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Customer Dashboard">;
 
@@ -26,7 +27,7 @@ export function SellerDashboard(props: Props) {
       />
       <Tab.Screen
         name="Profile"
-        component={HomeSellerTab}
+        component={ProfileSellerTab}
         options={{
           headerShown: false,
           tabBarIcon: (props) => (

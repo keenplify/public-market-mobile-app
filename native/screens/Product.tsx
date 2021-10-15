@@ -46,7 +46,7 @@ export function ProductViewer(props: Props) {
               sliderHeight={screenWidth}
               itemWidth={screenWidth - 60}
               renderItem={({ item, index }) => (
-                <Box shadow={3} bgColor="rgb(255,255,255)" key={index}>
+                <Box shadow={3} bgColor="rgb(255,255,255)" key={item.thumbUrl}>
                   <Image
                     source={serveImageURI(item.thumbUrl)}
                     alt="Preview"

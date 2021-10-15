@@ -89,7 +89,7 @@ router.post(
       data: {
         // url: extracted.url,
         // thumbUrl: extracted.thumbUrl,
-        url: __dirname + "/" + req.file.path,
+        url: req.file.path,
         thumbUrl: req.file.path,
         ownerId: user.id,
         productId: req.query.productId
