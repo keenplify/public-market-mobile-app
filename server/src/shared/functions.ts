@@ -46,23 +46,27 @@ export const isAdmin = (req: Request, res: Response) => {
 /**
  *Checks if the authenticated user is a customer . If not, it will return error 403.
  */
-export const isCustomer = (req: Request, res: Response) => {
+export const isCustomer = (req: Request, res: Response, next: NextFunction) => {
   const user = req.user as User;
   if (user!.type !== "CUSTOMER")
     res.status(403).send({
       message: "You are not a customer!",
     });
+
+  next();
 };
 
 /**
  *Checks if the authenticated user is a seller . If not, it will return error 403.
  */
-export const isSeller = (req: Request, res: Response) => {
+export const isSeller = (req: Request, res: Response, next: NextFunction) => {
   const user = req.user as User;
   if (user!.type !== "SELLER")
     res.status(403).send({
       message: "You are not a seller!",
     });
+
+  next();
 };
 
 /**

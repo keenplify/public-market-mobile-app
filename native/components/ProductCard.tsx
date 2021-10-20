@@ -34,6 +34,7 @@ export function ProductCard({ product, ...props }: Props) {
         style={{
           flex: 1,
         }}
+        onLongPress={() => console.log("Long Press")}
       >
         <VStack>
           <Flex

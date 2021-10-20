@@ -1,31 +1,15 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { NavigationContext } from "@react-navigation/native";
-import {
-  Box,
-  Button,
-  Divider,
-  Flex,
-  ScrollView,
-  Spinner,
-  Text,
-  Toast,
-  VStack,
-} from "native-base";
+import { Flex, ScrollView, Spinner, Text } from "native-base";
 import React, { useEffect } from "react";
 import { RefreshControl } from "react-native";
 import { useInfiniteQuery, useQuery } from "react-query";
 import { CustomerHomeMainProps } from "../customer-tabs/Home";
-import { useUserQuery } from "../helpers/auth";
 import { ProductsCursorPaginateQuery } from "../queries/products/cursorpaginate";
 import { SellerHomeMainProps } from "../seller-tabs/Home";
 import { ProductCard } from "./ProductCard";
 
 const isCloseToBottom = ({ layoutMeasurement, contentOffset, contentSize }) => {
-  const paddingToBottom = 40;
-  return (
-    layoutMeasurement.height + contentOffset.y >=
-    contentSize.height - paddingToBottom
-  );
+  // const paddingToBottom = 40;
+  return layoutMeasurement.height + contentOffset.y >= contentSize.height / 2;
 };
 
 export function ProductsLayout(

@@ -5,7 +5,8 @@ import { RootStackParamList } from "../App";
 import { useAuth } from "../helpers/auth";
 import { HomeSellerTab } from "../seller-tabs/Home";
 import { Feather } from "@expo/vector-icons";
-import { ProfileSellerTab } from "../seller-tabs/Profile";
+import { ProfileTab } from "../components/Profile";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Customer Dashboard">;
 
@@ -27,9 +28,8 @@ export function SellerDashboard(props: Props) {
       />
       <Tab.Screen
         name="Profile"
-        component={ProfileSellerTab}
+        component={ProfileTab}
         options={{
-          headerShown: false,
           tabBarIcon: (props) => (
             <Feather name="user" size={24} color="black" {...props} />
           ),

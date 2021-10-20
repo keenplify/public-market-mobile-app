@@ -131,7 +131,7 @@ router.delete(
     if (!deleteImage)
       return res.status(500).send({ message: "Unable to delete image!" });
 
-    return res.send({ message: "Image deleted successfully." });
+    return res.send({ message: "Success." });
   }
 );
 

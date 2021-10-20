@@ -1,5 +1,9 @@
 import { Image, Prisma, PrismaClient, Product, User } from ".prisma/client";
-import { authenticate, sendValidationErrors } from "@shared/functions";
+import {
+  authenticate,
+  isSeller,
+  sendValidationErrors,
+} from "@shared/functions";
 import { Router } from "express";
 import { body, check, param, query } from "express-validator";
 
@@ -14,6 +18,7 @@ router.post(
   body("price").isNumeric().notEmpty(),
   sendValidationErrors,
   authenticate,
+  isSeller,
   async (req, res) => {
     const user = req.user as User;
 
@@ -23,6 +28,11 @@ router.post(
         sellerId: user.id,
         description: req.body.description,
         price: Number.parseInt(req.body.price),
+      },
+      include: {
+        seller: true,
+        ratings: true,
+        images: true,
       },
     });
     if (!product)
@@ -49,26 +59,6 @@ router.post(
     return res.send({ message: "Success", product });
   }
 );
-
-// router.get(
-//   "/paginate",
-//   query("skip").isNumeric(),
-//   query("take").isNumeric(),
-//   sendValidationErrors,
-//   authenticate,
-//   async (req, res) => {
-//     const products = await prisma.product.findMany({
-//       take: Number.parseInt(req.query.take as string),
-//       skip: Number.parseInt(req.query.skip as string),
-//       orderBy: {
-//         id: "desc",
-//       },
-//     });
-//     const count = await prisma.product.count();
-
-//     return res.send({ message: "Success", products, count });
-//   }
-// );
 
 router.get(
   "/cursorpaginate",
@@ -111,7 +101,7 @@ router.get(
     }
 
     const products = await prisma.product.findMany({
-      take: 6,
+      take: 5,
       skip: 1,
       cursor: {
         id: cursor,
@@ -176,7 +166,7 @@ router.put(
   body("name").optional().not().isEmpty().isString(),
   body("price").optional().not().isEmpty().isString(),
   body("description").optional().not().isEmpty().isString(),
-  body("images").optional().not().isEmpty().isArray(),
+  body("images").optional().isArray(),
   sendValidationErrors,
   authenticate,
   async (req, res) => {
@@ -187,10 +177,27 @@ router.put(
       data: {
         name: req.body.name,
         description: req.body.description,
-        images: req.body.images.length > 0 ? req.body.images : undefined,
-        price: req.body.price,
+        price: Number.parseInt(req.body.price),
       },
     });
+
+    const promises: Prisma.Prisma__ImageClient<Image>[] = [];
+
+    req.body.images &&
+      req.body.images.forEach(async (imgId: number) => {
+        promises.push(
+          prisma.image.update({
+            where: {
+              id: imgId,
+            },
+            data: {
+              productId: product.id,
+            },
+          })
+        );
+      });
+
+    await Promise.all(promises);
 
     if (!product)
       return res.status(404).send({ message: "Product not found." });
@@ -204,6 +211,7 @@ router.delete(
   param("id").isNumeric(),
   sendValidationErrors,
   authenticate,
+  isSeller,
   async (req, res) => {
     const user = req.user as User;
 

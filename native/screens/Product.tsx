@@ -4,32 +4,122 @@ import {
   Box,
   Text,
   ScrollView,
-  Image,
   Heading,
   Badge,
+  HStack,
+  VStack,
+  Input,
+  Image,
 } from "native-base";
-import React from "react";
+import React, { Fragment, useState } from "react";
 import { CustomerHomeStackParamsList } from "../customer-tabs/Home";
-import Carousel, { ParallaxImage } from "react-native-snap-carousel";
+import Carousel from "react-native-snap-carousel";
 
-import { AntDesign } from "@expo/vector-icons";
 import { Dimensions, RefreshControl } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { serveImageURI } from "../helpers/string";
+import { PRIMARY_COLOR, serveImageURI } from "../helpers/string";
 import { useQuery } from "react-query";
 import { GetProductQuery } from "../queries/products/get";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import {
+  MaterialCommunityIcons,
+  AntDesign,
+  Feather,
+  Ionicons,
+} from "@expo/vector-icons";
+import { ProductProvider, useProduct } from "../helpers/ProductContext";
+import { UserCard } from "../components/UserCard";
+import useTimeAgo from "@rooks/use-time-ago";
+import { Rating } from "react-native-ratings";
+import { useUserQuery } from "../helpers/auth";
+import { Product_SellerMenu } from "../seller-tabs/Product_SellerMenu";
+import { AddProduct } from "./AddProduct";
+import { Image as IImage, Product } from "../helpers/types";
+
+const Tab = createBottomTabNavigator<ProductTabParamList>();
 
 type Props = NativeStackScreenProps<CustomerHomeStackParamsList, "Product">;
+type MainProductTabProps = Props &
+  NativeStackScreenProps<ProductTabParamList, "Main">;
 
 const { width: screenWidth } = Dimensions.get("window");
 
 export function ProductViewer(props: Props) {
-  const __product = props.route.params.product;
+  const { data } = useUserQuery();
+  const [isEditMode, setIsEditMode] = useState(false);
+
+  return (
+    <ProductProvider
+      value={{ product: props.route.params.product, isEditMode, setIsEditMode }}
+    >
+      <Tab.Navigator>
+        <Tab.Screen
+          name="Main"
+          component={__ProductViewer}
+          options={{
+            title: "Product",
+            headerShown: false,
+            tabBarIcon: (props) => (
+              <MaterialCommunityIcons
+                name="shopping"
+                size={24}
+                color="black"
+                {...props}
+              />
+            ),
+          }}
+        />
+        <Tab.Screen
+          name="Ratings"
+          component={__ProductViewer}
+          options={{
+            headerShown: false,
+            tabBarIcon: (props) => (
+              <AntDesign name="star" size={24} color="black" {...props} />
+            ),
+          }}
+        />
+        {data && data.user.id === props.route.params.product.sellerId ? (
+          <Tab.Screen
+            name="Edit"
+            component={AddProduct}
+            options={{
+              headerTitle: `Edit Product`,
+              tabBarIcon: (props) => (
+                <Feather name="edit" size={28} color="black" {...props} />
+              ),
+            }}
+            initialParams={{ product: props.route.params.product }}
+          />
+        ) : (
+          <Tab.Screen
+            name="Buy"
+            component={__ProductViewer}
+            options={{
+              headerShown: false,
+              tabBarIcon: (props) => (
+                <MaterialCommunityIcons name="cart" size={24} {...props} />
+              ),
+            }}
+          />
+        )}
+      </Tab.Navigator>
+    </ProductProvider>
+  );
+}
+
+export function __ProductViewer(props: MainProductTabProps) {
+  const { product: __product, isEditMode } = useProduct();
   const { data, isFetching, refetch } = useQuery(
     ["product", __product.id],
     async () => await GetProductQuery(__product.id)
   );
   const product = data?.data?.product || __product;
+  const timeAgo = useTimeAgo(product.createdAt, {
+    intervalMs: 0,
+    locale: "en-US",
+    relativeDate: new Date(),
+  });
 
   return (
     <SafeAreaView>
@@ -45,7 +135,7 @@ export function ProductViewer(props: Props) {
               sliderWidth={screenWidth}
               sliderHeight={screenWidth}
               itemWidth={screenWidth - 60}
-              renderItem={({ item, index }) => (
+              renderItem={({ item }) => (
                 <Box shadow={3} bgColor="rgb(255,255,255)" key={item.thumbUrl}>
                   <Image
                     source={serveImageURI(item.thumbUrl)}
@@ -59,23 +149,66 @@ export function ProductViewer(props: Props) {
           ) : (
             <Flex alignItems="center" p={8}>
               <AntDesign name="question" size={64} color="black" />
+              <Badge
+                colorScheme="danger"
+                children="No Product Image Found."
+                _text={{
+                  fontWeight: "bold",
+                  fontSize: "lg",
+                }}
+                mr={2}
+              />
             </Flex>
           )}
         </Flex>
-        <Flex mx={4} mt={4}>
-          <Flex flexDirection="row" alignItems="center">
-            <Heading>{product.name}</Heading>
-            <Badge colorScheme="info" ml={2}>
+        <Flex p={3} m={2} borderRadius="md" shadow={3} backgroundColor="white">
+          <Flex flexDirection="row" alignItems="center" maxW="100%">
+            <Heading ellipsizeMode="tail" flex={1} flexGrow={1}>
+              {product.name}
+            </Heading>
+            <Badge colorScheme="green">
               <Text fontWeight="bold" fontSize="xl">
                 ₱{product.price}
               </Text>
             </Badge>
           </Flex>
           <Flex>
+            <HStack space={2} my={1} flex={1} alignItems="center">
+              <Text color="#52525b">Ratings:</Text>
+              <Rating
+                ratingCount={5}
+                imageSize={16}
+                ratingColor={PRIMARY_COLOR}
+                readonly
+              />
+              <Badge
+                colorScheme="fuchsia"
+                children={`Created ${timeAgo}`}
+                variant="outline"
+              />
+            </HStack>
+          </Flex>
+          <Flex>
             <Text>{product.description}</Text>
           </Flex>
+        </Flex>
+        <Flex p={3} m={2} borderRadius="md" shadow={3} backgroundColor="white">
+          <VStack>
+            <Heading fontSize="lg">Seller Information</Heading>
+            <UserCard user={product.seller} />
+          </VStack>
         </Flex>
       </ScrollView>
     </SafeAreaView>
   );
 }
+
+export type ProductTabParamList = {
+  Main: undefined;
+  Ratings: undefined;
+  Buy?: undefined;
+  "Seller Menu"?: undefined;
+  Edit: {
+    product: Product;
+  };
+};

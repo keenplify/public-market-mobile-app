@@ -37,13 +37,7 @@ export type CustomerHomeMainProps = NativeStackScreenProps<
 >;
 
 function MainScreen(props: CustomerHomeMainProps) {
-  return (
-    <ScrollView>
-      <Flex alignItems="center" mt={1} mb={2}>
-        <ProductsLayout {...props} />
-      </Flex>
-    </ScrollView>
-  );
+  return <ProductsLayout {...props} />;
 }
 
 export type CustomerHomeStackParamsList = {

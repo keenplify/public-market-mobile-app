@@ -15,11 +15,12 @@ export interface Product {
   name: string;
   sellerId: number;
   description: string;
-  price: string;
+  price: number;
   ratings: Rating[];
   images: Image[];
   createdAt: string;
   updatedAt: string;
+  seller?: User;
 }
 
 export interface Image {

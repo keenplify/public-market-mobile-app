@@ -7,7 +7,7 @@ import { HomeCustomerTab } from "../customer-tabs/Home";
 import { NotificationsTab } from "../customer-tabs/Notifications";
 import { NewsTab } from "../customer-tabs/News";
 import { FontAwesome5 } from "@expo/vector-icons";
-import { ProfileTab } from "../customer-tabs/Profile";
+import { ProfileTab } from "../components/Profile";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Customer Dashboard">;
 
