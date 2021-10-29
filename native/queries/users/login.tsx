@@ -9,13 +9,17 @@ interface LoginResponse {
 }
 
 export const LoginQuery = async (email: string, password: string) => {
-  const response: AxiosResponse<LoginResponse> = await axios.post(
-    SERVER_API + "/api/users/login",
-    {
-      email,
-      password,
-    }
-  );
-
-  return response.data;
+  try {
+    const response: AxiosResponse<LoginResponse> = await axios.post(
+      SERVER_API + "/api/users/login",
+      {
+        email,
+        password,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    return { message: "Cannot connect to the server", error };
+  }
 };

@@ -3,11 +3,20 @@ import { FontAwesome } from "@expo/vector-icons";
 import { AntDesign } from "@expo/vector-icons";
 import { Feather } from "@expo/vector-icons";
 
-import React from "react";
+import React, { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { NativeStackHeaderProps } from "@react-navigation/native-stack";
+import { PRIMARY_COLOR } from "../helpers/string";
+import { SearchContext, useSearchContext } from "../helpers/SearchContext";
 
-export function CustomerHeader(props: NativeStackHeaderProps) {
+interface Props extends NativeStackHeaderProps {
+  keyword: string;
+  setKeyword: (keyword: string) => void;
+}
+
+export function CustomerHeader({ keyword, ...props }: Props) {
+  // const [keyword, setKeyword] = useSearchContext;
+
   return (
     <SafeAreaView>
       <Flex
@@ -29,6 +38,7 @@ export function CustomerHeader(props: NativeStackHeaderProps) {
             placeholderTextColor="gray.800"
             _hover={{ bg: "gray.200", borderWidth: 0 }}
             borderWidth={0}
+            onChangeText={(_keyword) => props.setKeyword(_keyword)}
             InputLeftElement={
               <Icon
                 ml="2"
@@ -36,16 +46,20 @@ export function CustomerHeader(props: NativeStackHeaderProps) {
                 as={<FontAwesome name="search" size={24} />}
               />
             }
+            onBlur={() => props.navigation.navigate("Search")}
+            onEndEditing={(e) => {
+              props.navigation.navigate("Search");
+            }}
           />
         </Flex>
 
         <IconButton
-          onPress={() => console.log("cart")}
+          onPress={() => props.navigation.navigate("Cart")}
           borderRadius={32}
           icon={<AntDesign name="shoppingcart" size={24} color="black" />}
         />
         <IconButton
-          onPress={() => console.log("messages")}
+          onPress={() => props.navigation.navigate("Messages")}
           borderRadius={32}
           icon={<Feather name="message-square" size={24} color="black" />}
         />

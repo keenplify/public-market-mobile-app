@@ -46,6 +46,7 @@ export function LoginComponent(props: Props) {
           if (!result.message?.includes("Success"))
             actions.setStatus(result.message);
           else {
+            //@ts-ignore
             setToken(result.token);
             toast.show({ description: "Login Successful." });
             props.navigation.goBack();
@@ -62,6 +63,7 @@ export function LoginComponent(props: Props) {
           isValid,
           errors,
           status,
+          setFieldValue,
         }) => (
           <VStack
             flexGrow={1}

@@ -4,12 +4,13 @@ import {
   Box,
   FormControl,
   Icon,
+  IInputProps,
   Input,
   Text,
   TextArea,
   WarningOutlineIcon,
 } from "native-base";
-import React, { Fragment } from "react";
+import React, { RefAttributes } from "react";
 import { capitalizeFirstLetter } from "../helpers/string";
 
 interface Props {
@@ -17,7 +18,9 @@ interface Props {
   iconLeftElement?: JSX.Element;
   name: string;
   label?: string;
-  type?: "input" | "password" | "textarea";
+  type?: "input" | "number" | "password" | "textarea";
+  _inputprops?: IInputProps & RefAttributes<unknown>;
+  hideLabel?: boolean;
 }
 
 export function FormikInput({
@@ -25,6 +28,8 @@ export function FormikInput({
   iconLeftElement,
   name,
   label,
+  _inputprops,
+  hideLabel,
   type = "input",
 }: Props) {
   const placeholder = label ? label : capitalizeFirstLetter(name);
@@ -35,12 +40,14 @@ export function FormikInput({
 
   return (
     <FormControl {...{ isInvalid: !!error }}>
-      <FormControl.Label _text={{ fontWeight: "bold" }}>
+      <FormControl.Label
+        _text={{ fontWeight: "bold", display: hideLabel ? "none" : undefined }}
+      >
         {placeholder}
       </FormControl.Label>
       {type === "input" || type === "password" ? (
         <Input
-          placeholder={placeholder}
+          placeholder={`Insert ${placeholder}`}
           onChangeText={handleChange}
           onBlur={handleBlur}
           value={value}
@@ -50,6 +57,8 @@ export function FormikInput({
             ) : undefined
           }
           type={type}
+          bgColor="white"
+          {..._inputprops}
         />
       ) : (
         type === "textarea" && (

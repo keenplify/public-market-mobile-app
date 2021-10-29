@@ -3,10 +3,9 @@ import axios, { AxiosResponse } from "axios";
 import { SERVER_API } from "../../helpers/string";
 import { Product } from "../../helpers/types";
 
-interface ProductsPaginateResponse {
+export interface ProductsPaginateResponse {
   message: string;
   products: Product[];
-  token: string;
   count: number;
   nextId: number;
 }

@@ -96,7 +96,6 @@ export function AddProduct(props: Props) {
               .filter((e) => e != undefined);
 
             try {
-              console.log(imageIds2);
               const query = await UpdateProductQuery({
                 ...values,
                 images: imageIds2,

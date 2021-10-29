@@ -5,6 +5,7 @@ import { Product } from "../../helpers/types";
 interface GetProductResponse {
   message: string;
   product: Product;
+  ratingsAverage: number;
 }
 
 export const GetProductQuery = async (id: number) => {

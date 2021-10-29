@@ -15,9 +15,13 @@ model Image {
   url       String
   thumbUrl  String
   product   Product?  @relation(fields: [productId], references: [id])
-  productId Int?      
+  productId Int?
+  rating    Rating?   @relation(fields: [ratingId], references: [id])
+  ratingId  Int?
   owner     User      @relation(fields: [ownerId], references: [id])
   ownerId   Int
+  message   Message?   @relation(fields: [messageId], references: [id])
+  messageId Int?
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 }
@@ -29,6 +33,7 @@ model Address {
   province   String
   city       String
   barangay   String
+  house      String
   postalCode String
   user       User       @relation(fields: [userId], references: [id])
   userId     Int        @unique
@@ -47,6 +52,28 @@ enum UserTypes {
   SELLER
 }
 
+enum SubOrderStatuses {
+  CANCELLED
+  PREPAIRING
+  TO_DELIVER
+  DELIVERING
+  DELIVERED
+  DECLINED
+}
+
+enum ModesOfPayment {
+  COD
+  GCASH
+  PAYMAYA
+}
+
+enum NotificationTypes {
+  ORDER_STATUS_UPDATE
+  NEW_ORDER
+  MESSAGE
+  REVIEW
+}
+
 model User {
   id       Int       @id @default(autoincrement())
   email    String    @unique
@@ -59,6 +86,12 @@ model User {
   products Product[]
   ratings  Rating[]
   images   Image[]
+  orders   Order[]
+  cartItems CartItem[]
+  subOrders   SubOrder[]
+  messagesMade  Message[] @relation(name:"From")
+  messagesReceived  Message[] @relation(name:"To")
+  notifications Notification[]
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 }
@@ -67,10 +100,11 @@ model Rating {
   id        Int     @id @default(autoincrement())
   text      String
   user      User    @relation(fields: [userId], references: [id])
-  userId    Int     @unique
+  userId    Int     
   product   Product @relation(fields: [productId], references: [id])
-  productId Int     @unique
-  rating    Int
+  productId Int     
+  rating    Float
+  images    Image[]
   createdAt DateTime @default(now())
   updatedAt DateTime  @updatedAt
 }
@@ -84,6 +118,71 @@ model Product {
   price       Int
   images      Image[]
   ratings     Rating[]
+  cartItems   CartItem[]
+  subOrders   SubOrder[]
   createdAt DateTime @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Order {
+  id          Int     @id @default(autoincrement())
+  customer    User    @relation(fields: [customerId], references: [id])
+  customerId  Int
+  subOrders   SubOrder[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime  @updatedAt
+  modeOfPayment ModesOfPayment
+}
+
+model SubOrder {
+  id          Int     @id @default(autoincrement())
+  product   Product @relation(fields: [productId], references: [id])
+  productId Int
+  status      SubOrderStatuses @default(PREPAIRING)
+  order       Order?     @relation(fields: [orderId], references: [id])
+  orderId     Int?
+  seller     User   @relation(fields: [sellerId], references: [id])
+  sellerId  Int
+  quantity  Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model CartItem {
+  id          Int       @id @default(autoincrement())
+  quantity    Int
+  product     Product   @relation(fields: [productId], references: [id])
+  productId   Int
+  customer    User      @relation(fields: [customerId], references: [id])
+  customerId  Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+
+model Message {
+  id          Int   @id @default(autoincrement())
+  message     String
+  images      Image[]
+  from        User  @relation(fields: [fromId], references: [id], name: "From")
+  fromId      Int
+  to        User  @relation(fields: [toId], references: [id], name: "To")
+  toId      Int
+createdAt DateTime @default(now())
+  updatedAt DateTime   @default(now())  @updatedAt
+}
+
+model Notification {
+  id           Int   @id @default(autoincrement())
+  description  String
+  title        String
+  type        NotificationTypes
+  read         Boolean @default(false)
+  urgent       Boolean @default(false)
+  url          String?
+  user         User @relation(fields: [userId], references: [id])
+  userId        Int
+  referencedId  Int
+createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 }

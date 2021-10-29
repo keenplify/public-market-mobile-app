@@ -1,7 +1,7 @@
 import React, { Dispatch, SetStateAction } from "react";
 import { Product } from "./types";
 
-const ProductContext = React.createContext<{
+export const ProductContext = React.createContext<{
   product: Partial<Product>;
   isEditMode: boolean;
   setIsEditMode: Dispatch<SetStateAction<boolean>>;

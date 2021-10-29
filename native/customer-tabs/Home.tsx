@@ -1,14 +1,11 @@
-import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
 import {
   createNativeStackNavigator,
   NativeStackScreenProps,
 } from "@react-navigation/native-stack";
-import { Box, Button, Flex, ScrollView, Text } from "native-base";
 import React from "react";
 import { ProductsLayout } from "../components/ProductsLayout";
-import { useAuth } from "../helpers/auth";
+import { useSearchContext } from "../helpers/SearchContext";
 import { Product } from "../helpers/types";
-import { CustomerTabParamList } from "../screens/CustomerDashboard";
 import { ProductViewer } from "../screens/Product";
 
 const CustomerHomeStack =
@@ -19,7 +16,7 @@ export function HomeCustomerTab() {
     <CustomerHomeStack.Navigator initialRouteName="Main">
       <CustomerHomeStack.Screen
         name="Main"
-        component={MainScreen}
+        component={ProductsLayout}
         options={{ headerShown: false }}
       />
       <CustomerHomeStack.Screen
@@ -35,10 +32,6 @@ export type CustomerHomeMainProps = NativeStackScreenProps<
   CustomerHomeStackParamsList,
   "Main"
 >;
-
-function MainScreen(props: CustomerHomeMainProps) {
-  return <ProductsLayout {...props} />;
-}
 
 export type CustomerHomeStackParamsList = {
   Main: undefined;

@@ -1,7 +1,7 @@
 import { Flex, Text, Image, VStack, Heading, HStack } from "native-base";
 import React, { useState } from "react";
 import { TouchableOpacity } from "react-native";
-import { Product } from "../helpers/types";
+import { Image as IImage, Product } from "../helpers/types";
 import { AntDesign } from "@expo/vector-icons";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import {
@@ -15,10 +15,20 @@ import {
 import { Rating } from "react-native-ratings";
 
 interface Props extends NativeStackScreenProps<any> {
-  product: Product;
+  product: Partial<Product>;
+  disabled?: boolean;
+  ratings?: number;
 }
 
-export function ProductCard({ product, ...props }: Props) {
+export function ProductCard({
+  product,
+  disabled = false,
+  ratings,
+  ...props
+}: Props) {
+  const sum = product.ratings.reduce((a, b) => a + b.rating, 0);
+  const avg = sum / product.ratings.length || 0;
+
   return (
     <Flex
       rounded="lg"
@@ -34,6 +44,7 @@ export function ProductCard({ product, ...props }: Props) {
         style={{
           flex: 1,
         }}
+        disabled={disabled}
         onLongPress={() => console.log("Long Press")}
       >
         <VStack>
@@ -69,11 +80,14 @@ export function ProductCard({ product, ...props }: Props) {
               {product.price}
             </Text>
           </Text>
+
           <Flex alignSelf="flex-end">
             <Rating
               ratingCount={5}
               imageSize={16}
               ratingColor={PRIMARY_COLOR}
+              fractions={1}
+              startingValue={avg}
               readonly
             />
           </Flex>

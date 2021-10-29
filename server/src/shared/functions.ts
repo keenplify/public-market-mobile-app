@@ -22,6 +22,7 @@ export const sendValidationErrors = (
   const errors = validationResult(req);
 
   if (!errors.isEmpty()) {
+    console.log(errors);
     return res.status(400).json({ errors: errors.array() });
   }
   return next();
@@ -49,7 +50,7 @@ export const isAdmin = (req: Request, res: Response) => {
 export const isCustomer = (req: Request, res: Response, next: NextFunction) => {
   const user = req.user as User;
   if (user!.type !== "CUSTOMER")
-    res.status(403).send({
+    return res.status(403).send({
       message: "You are not a customer!",
     });
 
@@ -62,7 +63,7 @@ export const isCustomer = (req: Request, res: Response, next: NextFunction) => {
 export const isSeller = (req: Request, res: Response, next: NextFunction) => {
   const user = req.user as User;
   if (user!.type !== "SELLER")
-    res.status(403).send({
+    return res.status(403).send({
       message: "You are not a seller!",
     });
 

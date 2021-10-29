@@ -1,5 +1,5 @@
 import "./pre-start";
-import React from "react";
+import React, { useState } from "react";
 import {
   createNativeStackNavigator,
   NativeStackScreenProps,
@@ -18,6 +18,14 @@ import { Product } from "./helpers/types";
 import { ProductViewer } from "./screens/Product";
 import { SellerDashboard } from "./screens/SellerDashboard";
 import { RegisterComponent } from "./screens/Register";
+import { AddressForm } from "./screens/AddressForm";
+import axios from "axios";
+import { Settings } from "./screens/Settings";
+import { AddRating } from "./screens/AddRating";
+import { useSocket } from "./helpers/auth";
+import { SocketContext } from "./helpers/MessagesContext";
+import { SearchContext } from "./helpers/SearchContext";
+import { useDebounce } from "rooks";
 
 LogBox.ignoreLogs(["Setting a timer", "contrast ratio"]);
 
@@ -25,6 +33,9 @@ const RootStack = createNativeStackNavigator<RootStackParamList>();
 const queryClient = new QueryClient();
 
 export default function App() {
+  const [keyword, setKeyword] = useState("");
+  const setDebouncedKeyword = useDebounce(setKeyword, 1000);
+
   return (
     <NativeBaseProvider>
       <QueryClientProvider client={queryClient}>
@@ -53,10 +64,18 @@ export default function App() {
               />
               <RootStack.Screen
                 name="Customer Dashboard"
-                component={CustomerDashboard}
                 options={{
-                  header: (props) => <CustomerHeader {...props} />,
+                  header: (props) => (
+                    <CustomerHeader
+                      keyword={keyword}
+                      setKeyword={setDebouncedKeyword}
+                      {...props}
+                    />
+                  ),
                 }}
+                children={(props) => (
+                  <CustomerDashboard keyword={keyword} {...props} />
+                )}
               />
               <RootStack.Screen
                 name="Seller Dashboard"
@@ -65,6 +84,12 @@ export default function App() {
                   headerShown: false,
                 }}
               />
+              <RootStack.Screen
+                name="Address Form"
+                component={AddressForm}
+                options={{ title: "Address Manager" }}
+              />
+              <RootStack.Screen name="Settings" component={Settings} />
               <RootStack.Screen name="Product" component={ProductViewer} />
             </RootStack.Navigator>
           </NavigationContainer>
@@ -87,4 +112,8 @@ export type RootStackParamList = {
   Product: {
     product: Product;
   };
+  "Address Form": {
+    redirect?: keyof RootStackParamList;
+  };
+  Settings: undefined;
 };

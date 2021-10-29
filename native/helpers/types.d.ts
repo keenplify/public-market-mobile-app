@@ -1,29 +1,94 @@
-export interface User {
-  createdAt: string;
+enum OrderStatuses {
+  "PREPAIRING",
+  "TO_DELIVER",
+  "DELIVERING",
+  "DELIVERED",
+}
+
+export interface IAudit {
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface User extends IAudit {
   email: string;
   gender: "MALE" | "FEMALE";
   id: number;
   number: string;
   password: string;
   type: "ADMIN" | "CUSTOMER" | "SELLER";
-  updatedAt: string;
   username: string;
+  address?: Address;
+  messagesMade: Message[];
+  messagesReceived: Message[];
 }
 
-export interface Product {
+export interface Product extends IAudit {
   id: number;
-  name: string;
-  sellerId: number;
-  description: string;
-  price: number;
-  ratings: Rating[];
-  images: Image[];
-  createdAt: string;
-  updatedAt: string;
+  name?: string;
+  sellerId?: number;
+  description?: string;
+  price?: number;
+  ratings?: Rating[];
+  images?: Image[];
   seller?: User;
 }
 
-export interface Image {
+export interface Address extends IAudit {
+  id: number;
+  name: string;
+  region: string;
+  province: string;
+  city: string;
+  barangay: string;
+  postalCode: string;
+  house: string;
+  user?: User;
+  userId: number;
+}
+
+export interface CartItem extends IAudit {
+  id: number;
+  quantity: number;
+  product: Product;
+  productId: number;
+  customer: User;
+  customerId: number;
+  order: Order;
+  orderId: number;
+}
+
+export interface Order extends IAudit {
+  id: number;
+  customer?: User;
+  customerId: number;
+  subOrders: SubOrder[];
+  modeOfPayment: string;
+}
+
+export interface SubOrder extends IAudit {
+  id: number;
+  product?: Product;
+  seller?: User;
+  quantity: number;
+  order?: Order;
+  status:
+    | "PREPAIRING"
+    | "TO_DELIVER"
+    | "DELIVERING"
+    | "DELIVERED"
+    | "DECLINED"
+    | "CANCELLED";
+}
+
+export interface Order extends IAudit {
+  id: number;
+  customer: User;
+  customerId: number;
+  cartItems: CartItem[];
+}
+
+export interface Image extends IAudit {
   id: number;
   url: string;
   thumbUrl: string;
@@ -31,11 +96,9 @@ export interface Image {
   productId?: number;
   owner?: User;
   ownerId: number;
-  createdAt: string;
-  updatedAt: string;
 }
 
-export interface Rating {
+export interface Rating extends IAudit {
   id: number;
   text: string;
   user?: User;
@@ -43,8 +106,7 @@ export interface Rating {
   product?: Product;
   productId: number;
   rating: number;
-  createdAt: string;
-  updatedAt: string;
+  images?: Image[];
 }
 
 export interface IImgBBUpload {
@@ -75,4 +137,38 @@ export interface IImgBBUpload {
   };
   success: boolean;
   status: number | 200;
+}
+
+export interface Message extends IAudit {
+  id: number;
+  message: string;
+  image?: Image[];
+  from?: User;
+  fromId?: number;
+  to?: User;
+  toId?: number;
+}
+
+export interface MessageReport {
+  message: string;
+}
+
+export interface Notification extends IAudit {
+  id: number;
+  description: string;
+  title: string;
+  type: "ORDER_STATUS_UPDATE" | "NEW_ORDER" | "MESSAGE" | "REVIEW";
+  read: boolean;
+  urgent: boolean;
+  url?: string;
+  user?: User;
+  userId: number;
+  referencedId: number;
+}
+
+enum NotificationTypes {
+  "ORDER_STATUS_UPDATE",
+  "NEW_ORDER",
+  "MESSAGE",
+  "REVIEW",
 }

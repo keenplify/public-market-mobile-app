@@ -1,5 +1,6 @@
-import { PrismaClient, User } from ".prisma/client";
-import { authenticate } from "@shared/functions";
+import { Address, PrismaClient, User } from ".prisma/client";
+import { authenticate, isCustomer } from "@shared/functions";
+import logger from "@shared/Logger";
 import { Router } from "express";
 import { body, param } from "express-validator";
 
@@ -31,10 +32,12 @@ router.post(
   body("province").not().isEmpty().isString(),
   body("city").not().isEmpty().isString(),
   body("barangay").not().isEmpty().isString(),
+  body("house").not().isEmpty().isString(),
   body("postalCode").not().isEmpty().isString(),
   authenticate,
   async (req, res) => {
     const user = req.user as User;
+    let address: Address;
 
     const address0 = await prisma.address.findFirst({
       where: {
@@ -43,21 +46,34 @@ router.post(
     });
 
     if (address0)
-      return res.send({
-        message: "You cannot create another address!",
+      address = await prisma.address.update({
+        data: {
+          name: req.body.name,
+          region: req.body.region,
+          province: req.body.province,
+          city: req.body.city,
+          barangay: req.body.barangay,
+          postalCode: req.body.postalCode,
+          house: req.body.house,
+        },
+        where: {
+          id: address0.id,
+        },
       });
-
-    const address = await prisma.address.create({
-      data: {
-        name: req.body.name,
-        region: req.body.region,
-        province: req.body.province,
-        city: req.body.city,
-        barangay: req.body.barangay,
-        postalCode: req.body.postalCode,
-        userId: user.id,
-      },
-    });
+    else {
+      address = await prisma.address.create({
+        data: {
+          name: req.body.name,
+          region: req.body.region,
+          province: req.body.province,
+          city: req.body.city,
+          barangay: req.body.barangay,
+          postalCode: req.body.postalCode,
+          house: req.body.house,
+          userId: user.id,
+        },
+      });
+    }
 
     if (!address) return res.send({ message: "Unable to create address" });
 

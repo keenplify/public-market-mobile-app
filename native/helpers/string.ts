@@ -11,7 +11,14 @@ export function getFirstLetters(string: string) {
 
 export const moneySign = "₱";
 
-export const SERVER_API: string = Constants.manifest.extra.SERVER_API;
+export const ENV: string = Constants.manifest.extra.ENV;
+
+export const SERVER_API: string =
+  ENV === "DEV"
+    ? Constants.manifest.extra.SERVER_API_DEV
+    : Constants.manifest.extra.SERVER_API;
+
+export const SERVER_SOCKET: string = Constants.manifest.extra.SERVER_SOCKET;
 
 export function isValidHttpUrl(string: string) {
   var pattern = new RegExp(
@@ -33,3 +40,8 @@ export function serveImageURI(url: string) {
 }
 
 export const PRIMARY_COLOR = "#00B6D4";
+
+// export const PriceFormat = new Intl.NumberFormat("tl-PH", {
+//   style: "currency",
+//   currency: "PHP",
+// });

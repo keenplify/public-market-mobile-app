@@ -45,11 +45,7 @@ export function HomeSellerTab() {
           ),
         })}
       />
-      <CustomerHomeStack.Screen
-        name="Product"
-        component={ProductViewer}
-        options={{ headerShown: false }}
-      />
+      <CustomerHomeStack.Screen name="Product" component={ProductViewer} />
       <CustomerHomeStack.Screen name="Add Product" component={AddProduct} />
     </CustomerHomeStack.Navigator>
   );

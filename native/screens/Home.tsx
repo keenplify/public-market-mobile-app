@@ -4,12 +4,14 @@ import { Button, Heading, Image, VStack, Text } from "native-base";
 import { SafeAreaInsetsContext } from "react-native-safe-area-context";
 import { RootStackParamList } from "../App";
 import { useAuth } from "../helpers/auth";
+import { useRefetchOnFocus } from "../helpers/useRefetchOnFocus";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Home">;
 
 export function HomeComponent(props: Props) {
   const { data, logout } = useAuth(props);
-  useEffect(() => {
+
+  const reroute = () => {
     if (!data || data === null) return;
 
     if (!data.message.includes("Success")) return logout();
@@ -18,7 +20,10 @@ export function HomeComponent(props: Props) {
       return props.navigation.replace("Customer Dashboard");
     else if (data.user.type === "SELLER")
       return props.navigation.replace("Seller Dashboard");
-  }, [data]);
+  };
+  useEffect(reroute, [data]);
+
+  useRefetchOnFocus(reroute);
 
   return (
     <SafeAreaInsetsContext.Consumer>

@@ -1,6 +1,7 @@
 import { Image, Prisma, PrismaClient, Product, User } from ".prisma/client";
 import {
   authenticate,
+  isCustomer,
   isSeller,
   sendValidationErrors,
 } from "@shared/functions";
@@ -38,23 +39,16 @@ router.post(
     if (!product)
       return res.status(400).send({ message: "Unable to create product." });
 
-    const promises: Prisma.Prisma__ImageClient<Image>[] = [];
-
-    req.body.images &&
-      req.body.images.forEach(async (imgId: number) => {
-        promises.push(
-          prisma.image.update({
-            where: {
-              id: imgId,
-            },
-            data: {
-              productId: product.id,
-            },
-          })
-        );
-      });
-
-    await Promise.all(promises);
+    await prisma.image.updateMany({
+      where: {
+        id: {
+          in: req.body.images,
+        },
+      },
+      data: {
+        productId: product.id,
+      },
+    });
 
     return res.send({ message: "Success", product });
   }
@@ -117,11 +111,12 @@ router.get(
     });
 
     const count = await prisma.product.count();
+    const _products = [...last, ...products];
 
     if (products.length === 0)
       return res.send({
         message: "Success",
-        products: [...last, ...products],
+        products: _products,
         count,
         nextId: false,
       });
@@ -130,7 +125,92 @@ router.get(
 
     return res.send({
       message: "Success",
-      products: [...last, ...products],
+      products: _products,
+      count,
+      nextId,
+    });
+  }
+);
+
+router.get(
+  "/customer/searchpaginate",
+  query("keyword").isString().notEmpty(),
+  query("cursor").optional().isNumeric(),
+  sendValidationErrors,
+  authenticate,
+  isCustomer,
+  async (req, res) => {
+    let user = req.user as User;
+    let cursor = Number.parseInt(req.query.cursor as string);
+    let last: Product[] = [];
+
+    const keyword = req.query.keyword as string;
+
+    const include = {
+      images: true,
+      seller: true,
+      ratings: true,
+    };
+
+    if (!req.query.cursor) {
+      last = await prisma.product.findMany({
+        where: {
+          name: {
+            contains: keyword,
+            mode: "insensitive",
+          },
+        },
+        take: 1,
+        include,
+        orderBy: { createdAt: "desc" },
+      });
+
+      //Check if any product found
+      if (last.length === 0)
+        return res.send({
+          message: "No products found",
+          products: [],
+          count: 0,
+          nextId: false,
+        });
+
+      cursor = last[0].id;
+    }
+
+    const products = await prisma.product.findMany({
+      take: 5,
+      skip: 1,
+      where: {
+        name: {
+          contains: keyword,
+          mode: "insensitive",
+        },
+      },
+      cursor: {
+        id: cursor,
+      },
+      orderBy: {
+        id: "desc",
+      },
+      include,
+    });
+
+    const count = await prisma.product.count();
+    const _products = [...last, ...products];
+
+    if (products.length === 0)
+      return res.send({
+        message: "Success",
+        products: _products,
+        count,
+        nextId: false,
+      });
+
+    const nextId = products[products.length - 1].id;
+
+    return res.send({
+      message: "Success",
+      products: _products,
       count,
       nextId,
     });
@@ -156,7 +236,19 @@ router.get(
     if (!product)
       return res.status(404).send({ message: "Product not found." });
 
-    return res.send({ message: "Success", product });
+    const ratings = await prisma.rating.findMany({
+      where: {
+        productId: product.id,
+      },
+      select: {
+        rating: true,
+      },
+    });
+
+    const sum = ratings.reduce((a, b) => a + b.rating, 0);
+    const avg = sum / ratings.length || 0;
+
+    return res.send({ message: "Success", product, ratingsAverage: avg });
   }
 );
 
@@ -181,23 +273,14 @@ router.put(
       },
     });
 
-    const promises: Prisma.Prisma__ImageClient<Image>[] = [];
-
-    req.body.images &&
-      req.body.images.forEach(async (imgId: number) => {
-        promises.push(
-          prisma.image.update({
-            where: {
-              id: imgId,
-            },
-            data: {
-              productId: product.id,
-            },
-          })
-        );
-      });
-
-    await Promise.all(promises);
+    await prisma.image.updateMany({
+      where: {
+        OR: req.body.images.map((id: number) => ({ id })),
+      },
+      data: {
+        productId: product.id,
+      },
+    });
 
     if (!product)
       return res.status(404).send({ message: "Product not found." });

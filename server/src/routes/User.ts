@@ -72,7 +72,7 @@ userRouter.post(
     });
 
     if (!user) {
-      return res.status(404).send({ message: "User not found." });
+      return res.send({ message: "User not found." });
     }
 
     if (!(await bcrypt.compare(req.body.password, user.password)))
@@ -91,6 +91,20 @@ userRouter.get(
     const user = await prisma.user.findFirst({
       where: {
         id: Number.parseInt(req.params.id),
+      },
+      include: {
+        messagesMade: {
+          include: {
+            from: true,
+            to: true,
+          },
+        },
+        messagesReceived: {
+          include: {
+            from: true,
+            to: true,
+          },
+        },
       },
     });
 

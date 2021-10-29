@@ -10,6 +10,7 @@ import {
   VStack,
   Input,
   Image,
+  Spinner,
 } from "native-base";
 import React, { Fragment, useState } from "react";
 import { CustomerHomeStackParamsList } from "../customer-tabs/Home";
@@ -35,11 +36,13 @@ import { useUserQuery } from "../helpers/auth";
 import { Product_SellerMenu } from "../seller-tabs/Product_SellerMenu";
 import { AddProduct } from "./AddProduct";
 import { Image as IImage, Product } from "../helpers/types";
+import { AddToCart } from "../components/AddToCartProduct";
+import { ProductRatings } from "./ProductRatings";
 
 const Tab = createBottomTabNavigator<ProductTabParamList>();
 
 type Props = NativeStackScreenProps<CustomerHomeStackParamsList, "Product">;
-type MainProductTabProps = Props &
+export type MainProductTabProps = Props &
   NativeStackScreenProps<ProductTabParamList, "Main">;
 
 const { width: screenWidth } = Dimensions.get("window");
@@ -71,7 +74,7 @@ export function ProductViewer(props: Props) {
         />
         <Tab.Screen
           name="Ratings"
-          component={__ProductViewer}
+          component={ProductRatings}
           options={{
             headerShown: false,
             tabBarIcon: (props) => (
@@ -79,7 +82,8 @@ export function ProductViewer(props: Props) {
             ),
           }}
         />
-        {data && data.user.id === props.route.params.product.sellerId ? (
+        {data?.user &&
+        data.user.id === props.route.params?.product?.sellerId ? (
           <Tab.Screen
             name="Edit"
             component={AddProduct}
@@ -93,13 +97,14 @@ export function ProductViewer(props: Props) {
           />
         ) : (
           <Tab.Screen
-            name="Buy"
-            component={__ProductViewer}
+            name="Add to Cart"
+            component={AddToCart}
             options={{
               headerShown: false,
               tabBarIcon: (props) => (
                 <MaterialCommunityIcons name="cart" size={24} {...props} />
               ),
+              tabBarButton: !!data?.user?.address ? undefined : () => null,
             }}
           />
         )}
@@ -121,92 +126,100 @@ export function __ProductViewer(props: MainProductTabProps) {
     relativeDate: new Date(),
   });
 
+  const sum = product?.ratings?.reduce((a, b) => a + b.rating, 0) || 0;
+  const avg = sum / product?.ratings?.length || 0;
+
   return (
-    <SafeAreaView>
-      <ScrollView
-        refreshControl={
-          <RefreshControl refreshing={isFetching} onRefresh={refetch} />
-        }
-      >
-        <Flex alignItems="center" mt={2}>
-          {product.images?.length > 0 && product?.images[0] ? (
-            <Carousel
-              data={product.images}
-              sliderWidth={screenWidth}
-              sliderHeight={screenWidth}
-              itemWidth={screenWidth - 60}
-              renderItem={({ item }) => (
-                <Box shadow={3} bgColor="rgb(255,255,255)" key={item.thumbUrl}>
-                  <Image
-                    source={serveImageURI(item.thumbUrl)}
-                    alt="Preview"
-                    w="100%"
-                    style={{ aspectRatio: 1 }}
-                  />
-                </Box>
-              )}
+    <ScrollView
+      refreshControl={
+        <RefreshControl refreshing={isFetching} onRefresh={refetch} />
+      }
+    >
+      <Flex alignItems="center" mt={2}>
+        {product.images?.length > 0 && product?.images[0] ? (
+          <Carousel
+            data={product.images}
+            sliderWidth={screenWidth}
+            sliderHeight={screenWidth}
+            itemWidth={screenWidth - 60}
+            renderItem={({ item }) => (
+              <Box shadow={3} bgColor="rgb(255,255,255)" key={item.thumbUrl}>
+                <Image
+                  source={serveImageURI(item.thumbUrl)}
+                  alt="Preview"
+                  w="100%"
+                  style={{ aspectRatio: 1 }}
+                />
+              </Box>
+            )}
+          />
+        ) : (
+          <Flex alignItems="center" p={8}>
+            <AntDesign name="question" size={64} color="black" />
+            <Badge
+              colorScheme="danger"
+              children="No Product Image Found."
+              _text={{
+                fontWeight: "bold",
+                fontSize: "lg",
+              }}
+              mr={2}
             />
+          </Flex>
+        )}
+      </Flex>
+      <Flex p={3} m={2} borderRadius="md" shadow={3} backgroundColor="white">
+        <Flex flexDirection="row" alignItems="center" maxW="100%">
+          <Heading ellipsizeMode="tail" flex={1} flexGrow={1}>
+            {product.name}
+          </Heading>
+          <Badge colorScheme="green">
+            <Text fontWeight="bold" fontSize="xl">
+              ₱{product.price}
+            </Text>
+          </Badge>
+        </Flex>
+        <Flex>
+          <HStack space={2} my={1} flex={1} alignItems="center">
+            <Text color="#52525b">Ratings:</Text>
+            <Rating
+              ratingCount={5}
+              imageSize={16}
+              ratingColor={PRIMARY_COLOR}
+              startingValue={avg}
+              readonly
+            />
+            <Badge
+              colorScheme="fuchsia"
+              children={`Created ${timeAgo}`}
+              variant="outline"
+            />
+          </HStack>
+        </Flex>
+        <Flex>
+          <Text>{product.description}</Text>
+        </Flex>
+      </Flex>
+      <Flex p={3} m={2} borderRadius="md" shadow={3} backgroundColor="white">
+        <VStack>
+          <Heading fontSize="lg">Seller Information</Heading>
+          {product.seller ? (
+            <UserCard user={product.seller} {...props} />
           ) : (
-            <Flex alignItems="center" p={8}>
-              <AntDesign name="question" size={64} color="black" />
-              <Badge
-                colorScheme="danger"
-                children="No Product Image Found."
-                _text={{
-                  fontWeight: "bold",
-                  fontSize: "lg",
-                }}
-                mr={2}
-              />
+            <Flex alignItems="center" justifyContent="center" p={2}>
+              <Spinner />
             </Flex>
           )}
-        </Flex>
-        <Flex p={3} m={2} borderRadius="md" shadow={3} backgroundColor="white">
-          <Flex flexDirection="row" alignItems="center" maxW="100%">
-            <Heading ellipsizeMode="tail" flex={1} flexGrow={1}>
-              {product.name}
-            </Heading>
-            <Badge colorScheme="green">
-              <Text fontWeight="bold" fontSize="xl">
-                ₱{product.price}
-              </Text>
-            </Badge>
-          </Flex>
-          <Flex>
-            <HStack space={2} my={1} flex={1} alignItems="center">
-              <Text color="#52525b">Ratings:</Text>
-              <Rating
-                ratingCount={5}
-                imageSize={16}
-                ratingColor={PRIMARY_COLOR}
-                readonly
-              />
-              <Badge
-                colorScheme="fuchsia"
-                children={`Created ${timeAgo}`}
-                variant="outline"
-              />
-            </HStack>
-          </Flex>
-          <Flex>
-            <Text>{product.description}</Text>
-          </Flex>
-        </Flex>
-        <Flex p={3} m={2} borderRadius="md" shadow={3} backgroundColor="white">
-          <VStack>
-            <Heading fontSize="lg">Seller Information</Heading>
-            <UserCard user={product.seller} />
-          </VStack>
-        </Flex>
-      </ScrollView>
-    </SafeAreaView>
+        </VStack>
+      </Flex>
+    </ScrollView>
   );
 }
 
 export type ProductTabParamList = {
   Main: undefined;
   Ratings: undefined;
-  Buy?: undefined;
+  "Add to Cart"?: undefined;
   "Seller Menu"?: undefined;
   Edit: {
     product: Product;
