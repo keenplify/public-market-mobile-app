@@ -58,7 +58,7 @@ export function ProductCard({
             {typeof product?.images === "object" &&
             typeof product?.images[0] === "object" ? (
               <Image
-                source={serveImageURI(product.images[0].thumbUrl)}
+                source={serveImageURI(product.images[0].id)}
                 style={{ aspectRatio: 1, backgroundColor: "white" }}
                 alt={`${product.name} preview`}
                 w="100%"

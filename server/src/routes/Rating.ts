@@ -5,7 +5,7 @@ import {
   sendValidationErrors,
 } from "@shared/functions";
 import { Router } from "express";
-import { body, param, query } from "express-validator";
+import { body, param } from "express-validator";
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -21,44 +21,41 @@ router.post(
   isCustomer,
   async (req, res) => {
     const user = req.user as User;
-    let rating: Rating | null;
+    let rating;
 
-    const pastRating = await prisma.rating.findFirst({
+    const updateMany = await prisma.rating.updateMany({
       where: {
         userId: user.id,
       },
-    });
-
-    if (pastRating) {
-      const updated = await prisma.rating.updateMany({
-        data: {
-          text: req.body.text,
-          rating: req.body.rating,
-          productId: req.body.productId,
-        },
-        where: {
-          id: pastRating.id,
-        },
-      });
-
-      rating = await prisma.rating.findFirst({
-        where: {
-          userId: user.id,
-        },
-      });
-    }
-
-    rating = await prisma.rating.create({
       data: {
         text: req.body.text,
         rating: req.body.rating,
         productId: req.body.productId,
-        userId: user.id,
-      },
-      include: {
-        product: true,
       },
     });
+
+    if (updateMany.count === 0) {
+      rating = await prisma.rating.create({
+        data: {
+          text: req.body.text,
+          rating: req.body.rating,
+          productId: req.body.productId,
+          userId: user.id,
+        },
+        include: {
+          product: true,
+        },
+      });
+    } else {
+      rating = await prisma.rating.findFirst({
+        where: {
+          userId: user.id,
+        },
+        include: {
+          product: true,
+        },
+      });
+    }
 
     if (!rating || typeof rating === null || rating === null)
       return res.status(400).send({ message: "Unable to create a rating." });
@@ -72,7 +69,6 @@ router.post(
       },
     });
 
-    //@ts-ignore
     const userId: number = rating.product.sellerId;
 
     // create notification to seller
@@ -163,29 +159,25 @@ router.delete(
 );
 
 router.get(
-  "/cursorpaginate",
-  query("cursor").optional().isNumeric(),
-  query("productId").isNumeric(),
+  "/product/:productId/cursorpaginate/:cursor?",
+  param("productId").isNumeric(),
   sendValidationErrors,
   authenticate,
   async (req, res) => {
     let user = req.user as User;
-    let cursor = Number.parseInt(req.query.cursor as string);
+    let cursor = Number.parseInt(req.params.cursor as string);
     let sellerId;
     let last: Rating[] = [];
+
     const where = {
-      productId:
-        typeof req.query.productId === "number" ||
-        typeof req.query.productId === "string"
-          ? Number.parseInt(req.query.productId)
-          : undefined,
+      productId: Number.parseInt(req.params.productId),
     };
     const include = {
       images: true,
       user: true,
     };
     if (user.type === "SELLER") sellerId = user.id;
-    if (!req.query.cursor) {
+    if (!req.params.cursor) {
       last = await prisma.rating.findMany({
         where,
         take: 1,
@@ -214,10 +206,15 @@ router.get(
       orderBy: {
         id: "desc",
       },
+      where,
       include,
     });
 
-    const count = await prisma.product.count();
+    const count = await prisma.rating
+      .findMany({
+        where,
+      })
+      .then((e) => e.length);
 
     if (ratings.length === 0)
       return res.send({

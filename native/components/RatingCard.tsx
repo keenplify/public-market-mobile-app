@@ -44,7 +44,7 @@ export function RatingCard({ rating, refetch }: Props) {
         {typeof rating?.images === "object" &&
           typeof rating?.images[0] === "object" && (
             <Image
-              source={serveImageURI(rating.images[0].thumbUrl)}
+              source={serveImageURI(rating.images[0].id)}
               style={{ aspectRatio: 1, backgroundColor: "white" }}
               alt={`Rating review`}
               w={16}

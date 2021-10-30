@@ -7,10 +7,9 @@ import useTimeAgo from "@rooks/use-time-ago";
 
 interface Props {
   message: Message;
-  socket: Socket;
 }
 
-export function MessageCard({ message, socket }: Props) {
+export function MessageCard({ message }: Props) {
   const { data: user } = useUserQuery();
   const fromMe = user?.user?.id === message.fromId;
 

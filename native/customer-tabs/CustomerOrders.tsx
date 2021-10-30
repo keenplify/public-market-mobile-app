@@ -13,7 +13,6 @@ import {
 import React, { Fragment } from "react";
 import { RefreshControl } from "react-native";
 import { useInfiniteQuery } from "react-query";
-import { isCloseToBottom } from "../components/ProductsLayout";
 import { SubOrderComponent } from "../components/SubOrder";
 import { CustomerOrdersCursorPaginateQuery } from "../queries/orders/customerorderscursorpaginate";
 import { CustomerTabParamList } from "../screens/CustomerDashboard";
@@ -22,6 +21,7 @@ import { CustomerOrderComponent } from "../components/CustomerOrder";
 import { PRIMARY_COLOR } from "../helpers/string";
 import { useRefetchOnFocus } from "../helpers/useRefetchOnFocus";
 import { RootStackParamList } from "../App";
+import { isCloseToBottom } from "../components/TrueProductLayout";
 
 export type CustomerOrdersComponentProps = BottomTabScreenProps<
   CustomerTabParamList & RootStackParamList,
@@ -71,21 +71,26 @@ export function CustomerOrdersComponent(props: CustomerOrdersComponentProps) {
             {isFetched ? (
               data.pages.map((_data, key1) => (
                 <Fragment key={key1}>
-                  {_data?.count > 0 && _data.orders ? (
-                    _data.orders.map((order, key2) => (
-                      <CustomerOrderComponent
-                        order={order}
-                        key={key2}
-                        refetch={refetch}
-                        {...props}
-                      />
-                    ))
-                  ) : (
-                    <Flex alignItems="center" flexGrow={1} my={8} key={key1}>
-                      <AntDesign name="meh" size={64} color="black" />
-                      <Text mt={4}>No orders found.</Text>
-                    </Flex>
-                  )}
+                  {_data?.count > 0 && _data.orders
+                    ? _data.orders.map((order, key2) => (
+                        <CustomerOrderComponent
+                          order={order}
+                          key={key2}
+                          refetch={refetch}
+                          {...props}
+                        />
+                      ))
+                    : key1 === 0 && (
+                        <Flex
+                          alignItems="center"
+                          flexGrow={1}
+                          my={8}
+                          key={key1}
+                        >
+                          <AntDesign name="meh" size={64} color="black" />
+                          <Text mt={4}>No orders found.</Text>
+                        </Flex>
+                      )}
                 </Fragment>
               ))
             ) : (

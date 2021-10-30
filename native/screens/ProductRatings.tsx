@@ -2,13 +2,13 @@ import { Flex, Heading, ScrollView, Spinner, Text, VStack } from "native-base";
 import React, { Fragment } from "react";
 import { RefreshControl } from "react-native";
 import { useInfiniteQuery } from "react-query";
-import { isCloseToBottom } from "../components/ProductsLayout";
 import { RatingCard } from "../components/RatingCard";
 import { useProduct } from "../helpers/ProductContext";
 import { PRIMARY_COLOR } from "../helpers/string";
 import { useRefetchOnFocus } from "../helpers/useRefetchOnFocus";
 import { RatingsCursorPaginateQuery } from "../queries/ratings/cursorpaginate";
 import { AntDesign, Feather } from "@expo/vector-icons";
+import { isCloseToBottom } from "../components/TrueProductLayout";
 
 export function ProductRatings(props: any) {
   const { product } = useProduct();
@@ -17,7 +17,9 @@ export function ProductRatings(props: any) {
     useInfiniteQuery(
       "seller_suborders",
       async ({ pageParam }) =>
-        await RatingsCursorPaginateQuery(product.id, pageParam),
+        product.id
+          ? await RatingsCursorPaginateQuery(product.id, pageParam)
+          : null,
       {
         getNextPageParam: (lastPage) => lastPage?.nextId ?? false,
       }
@@ -51,18 +53,22 @@ export function ProductRatings(props: any) {
             </Heading>
           </Flex>
           {isFetched ? (
-            data.pages.map((_data, key1) => (
+            data?.pages?.map((_data, key1) => (
               <Fragment key={key1}>
-                {_data?.count > 0 && _data.ratings ? (
-                  _data.ratings.map((rating, key2) => (
-                    <RatingCard rating={rating} refetch={refetch} key={key2} />
-                  ))
-                ) : (
-                  <Flex alignItems="center" flexGrow={1} my={8} key={key1}>
-                    <AntDesign name="meh" size={64} color="black" />
-                    <Text mt={4}>No ratings found for this product.</Text>
-                  </Flex>
-                )}
+                {_data?.count > 0 && _data.ratings
+                  ? _data.ratings.map((rating, key2) => (
+                      <RatingCard
+                        rating={rating}
+                        refetch={refetch}
+                        key={key2}
+                      />
+                    ))
+                  : key1 === 0 && (
+                      <Flex alignItems="center" flexGrow={1} my={8} key={key1}>
+                        <AntDesign name="meh" size={64} color="black" />
+                        <Text mt={4}>No ratings found for this product.</Text>
+                      </Flex>
+                    )}
               </Fragment>
             ))
           ) : (

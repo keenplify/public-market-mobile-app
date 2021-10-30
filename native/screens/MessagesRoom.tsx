@@ -12,7 +12,7 @@ import {
 import { Socket } from "socket.io-client";
 import { Message } from "../helpers/types";
 import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
-import { CustomerTabParamList, Grouped } from "./CustomerDashboard";
+import { CustomerTabParamList } from "./CustomerDashboard";
 import { useInfiniteQuery, useQuery } from "react-query";
 import { Formik } from "formik";
 import { FormikInput } from "../components/FormikInput";
@@ -20,14 +20,11 @@ import { MessageCard } from "../components/MessageCard";
 import { useRefetchOnFocus } from "../helpers/useRefetchOnFocus";
 import { MessagesCursorPaginateQuery } from "../queries/messages/cursorpagination";
 import { RefreshControl } from "react-native";
-import { isCloseToBottom } from "../components/ProductsLayout";
 import { Feather, AntDesign } from "@expo/vector-icons";
 import { AddMessageQuery } from "../queries/messages/add";
 
 interface Props
-  extends BottomTabScreenProps<CustomerTabParamList, "Conversation"> {
-  socket: Socket;
-}
+  extends BottomTabScreenProps<CustomerTabParamList, "Conversation"> {}
 
 // export const isCloseToTop = ({
 //   layoutMeasurement,
@@ -38,7 +35,7 @@ interface Props
 //   return layoutMeasurement.height + contentOffset.y >= contentSize.height / 2;
 // };
 
-export function MessagesRoom({ socket, navigation, route }: Props) {
+export function MessagesRoom({ navigation, route }: Props) {
   const { data, isFetching, refetch, isFetched, hasNextPage, fetchNextPage } =
     useInfiniteQuery(
       ["room", route.params.to.id],
@@ -57,14 +54,14 @@ export function MessagesRoom({ socket, navigation, route }: Props) {
 
   useRefetchOnFocus(refetch);
 
-  useEffect(() => {
-    socket.on("messageCreated", () => {
-      console.log("message received!");
-      refetch();
-    });
-    socket.on("messageDeleted", refetch);
-    socket.on("messageEdited", refetch);
-  }, []);
+  // useEffect(() => {
+  //   socket.on("messageCreated", () => {
+  //     console.log("message received!");
+  //     refetch();
+  //   });
+  //   socket.on("messageDeleted", refetch);
+  //   socket.on("messageEdited", refetch);
+  // }, []);
 
   return (
     <Flex flexGrow={1} flex={1}>
@@ -89,7 +86,7 @@ export function MessagesRoom({ socket, navigation, route }: Props) {
               <Fragment key={key1}>
                 {_data.count > 0 &&
                   _data.messages.map((message, key2) => (
-                    <MessageCard message={message} key={key2} socket={socket} />
+                    <MessageCard message={message} key={key2} />
                   ))}
               </Fragment>
             ))

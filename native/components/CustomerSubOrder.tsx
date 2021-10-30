@@ -48,7 +48,7 @@ export function CustomerSubOrderComponent({
           <Flex mr={2} justifyContent="center" my={1}>
             {subOrder.product?.images && subOrder.product.images[0] ? (
               <Image
-                source={serveImageURI(subOrder.product.images[0].url)}
+                source={serveImageURI(subOrder.product.images[0].id)}
                 alt="Preview"
                 style={{ aspectRatio: 1, width: 62 }}
                 borderRadius="md"

@@ -96,7 +96,7 @@ export function CartItem({ item, refetchList, ...props }: Props) {
           productData.data.product.images[0] ? (
             <Flex>
               <Image
-                source={serveImageURI(productData.data.product.images[0].url)}
+                source={serveImageURI(productData.data.product.images[0].id)}
                 alt="Preview"
                 style={{ aspectRatio: 1, width: 52 }}
                 borderRadius="md"

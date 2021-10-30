@@ -62,7 +62,7 @@ export function AddToCart(props: Props) {
                 <Flex flex={0.5}>
                   {product.images[0] ? (
                     <Image
-                      source={serveImageURI(product.images[0].url)}
+                      source={serveImageURI(product.images[0].id)}
                       alt="Preview"
                       w="100%"
                       style={{ aspectRatio: 1 }}

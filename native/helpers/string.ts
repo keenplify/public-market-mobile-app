@@ -33,10 +33,10 @@ export function isValidHttpUrl(string: string) {
   return !!pattern.test(string);
 }
 
-export function serveImageURI(url: string) {
-  if (isValidHttpUrl(url)) return { uri: url };
+export function serveImageURI(id: string | number) {
+  if (isValidHttpUrl(id.toString())) return { uri: id.toString() };
 
-  return { uri: SERVER_API + "/" + url };
+  return { uri: SERVER_API + `/api/images/file/${id}` };
 }
 
 export const PRIMARY_COLOR = "#00B6D4";

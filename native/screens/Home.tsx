@@ -9,22 +9,6 @@ import { useRefetchOnFocus } from "../helpers/useRefetchOnFocus";
 type Props = NativeStackScreenProps<RootStackParamList, "Home">;
 
 export function HomeComponent(props: Props) {
-  const { data, logout } = useAuth(props);
-
-  const reroute = () => {
-    if (!data || data === null) return;
-
-    if (!data.message.includes("Success")) return logout();
-
-    if (data.user.type === "CUSTOMER")
-      return props.navigation.replace("Customer Dashboard");
-    else if (data.user.type === "SELLER")
-      return props.navigation.replace("Seller Dashboard");
-  };
-  useEffect(reroute, [data]);
-
-  useRefetchOnFocus(reroute);
-
   return (
     <SafeAreaInsetsContext.Consumer>
       {(insets) => (

@@ -43,13 +43,12 @@ export function LoginComponent(props: Props) {
           toast.show({ description: "Logging in..." });
           const result = await LoginQuery(email, password);
 
-          if (!result.message?.includes("Success"))
+          if (typeof result.token === "undefined")
             actions.setStatus(result.message);
           else {
-            //@ts-ignore
             setToken(result.token);
             toast.show({ description: "Login Successful." });
-            props.navigation.goBack();
+            return props.navigation.replace("Splash");
           }
         }}
         validationSchema={schema}

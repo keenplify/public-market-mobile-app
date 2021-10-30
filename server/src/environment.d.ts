@@ -14,6 +14,11 @@ declare global {
       FIH_KEY?: string;
 
       DATABASE_URL?: string;
+
+      AWS_BUCKET_NAME?: string;
+      AWS_BUCKET_REGION?: string;
+      AWS_CREDENTIALS_ID?: string;
+      AWS_CREDENTIALS_SECRET?: string;
     }
   }
 }

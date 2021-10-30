@@ -8,7 +8,7 @@ import { capitalizeFirstLetter, getFirstLetters } from "../helpers/string";
 import { Message, User } from "../helpers/types";
 import { useRefetchOnFocus } from "../helpers/useRefetchOnFocus";
 import { GetUserQuery } from "../queries/users/get";
-import { CustomerTabParamList, Grouped } from "../screens/CustomerDashboard";
+import { CustomerTabParamList } from "../screens/CustomerDashboard";
 
 interface Props extends BottomTabScreenProps<CustomerTabParamList, "Messages"> {
   userId: number;

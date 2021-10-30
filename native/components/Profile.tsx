@@ -32,6 +32,7 @@ type Props = BottomTabScreenProps<
   BottomTabScreenProps<SellerTabParamList, "Profile">;
 
 export function ProfileTab(props: Props) {
+  const [loggingOut, setLoggingOut] = useState(false);
   const { data } = useUserQuery();
   const { logout } = useAuth(props);
   const [color] = useState(randomColor({ luminosity: "light" }));
@@ -70,15 +71,10 @@ export function ProfileTab(props: Props) {
 
         <ProductMenuButton
           onPress={() => {
-            props.navigation.navigate("Settings");
+            setLoggingOut(true);
+            logout();
           }}
-          text="Settings"
-          icon={<MaterialCommunityIcons name="cog" />}
-          color={color}
-        />
-
-        <ProductMenuButton
-          onPress={() => logout()}
+          disabled={loggingOut}
           text="Logout"
           icon={<MaterialCommunityIcons name="logout" />}
           color={color}
@@ -99,9 +95,10 @@ export function ProductMenuButton({
   text,
   onPress,
   color,
+  ...props
 }: ProductMenuButtonProps) {
   return (
-    <TouchableOpacity style={style.listButtons} onPress={onPress}>
+    <TouchableOpacity style={style.listButtons} onPress={onPress} {...props}>
       <HStack flex={1} alignItems="center" mx={2}>
         <Circle bg="black" size={12} borderRadius={32}>
           <Icon as={icon} color={color} size={22} />

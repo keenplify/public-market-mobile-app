@@ -46,10 +46,9 @@ export function CustomerHeader({ keyword, ...props }: Props) {
                 as={<FontAwesome name="search" size={24} />}
               />
             }
-            onBlur={() => props.navigation.navigate("Search")}
-            onEndEditing={(e) => {
-              props.navigation.navigate("Search");
-            }}
+            onSubmitEditing={() =>
+              keyword.length > 0 && props.navigation.navigate("Search")
+            }
           />
         </Flex>
 

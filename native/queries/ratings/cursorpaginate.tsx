@@ -18,14 +18,11 @@ export const RatingsCursorPaginateQuery = async (
   const asToken = token || (await AsyncStorage.getItem("token"));
 
   if (asToken === null || !asToken) return null;
-
+  let url = `/api/ratings/product/${productId}/cursorpaginate/`;
+  if (cursor) url = url + cursor;
   const response: AxiosResponse<RatingsPaginateResponse> = await axios.get(
-    SERVER_API + "/api/ratings/cursorpaginate",
+    SERVER_API + url,
     {
-      params: {
-        cursor,
-        productId,
-      },
       headers: {
         Authorization: "Bearer " + asToken,
       },

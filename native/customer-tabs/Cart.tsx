@@ -34,7 +34,7 @@ export function Cart(props: Props) {
   const cancelCheckOutRef = useRef(null);
   const [isCheckOutOpen, setIsCheckOutOpen] = useState(false);
   const onCheckOutClose = () => setIsCheckOutOpen(false);
-
+  const [submitting, setSubmitting] = useState(false);
   const { data, refetch, isFetching } = useQuery(
     "cart",
     async () => await getAllCartItemsQuery()
@@ -127,7 +127,8 @@ export function Cart(props: Props) {
           </Flex>
           <Flex ml="auto" justifyContent="center" alignItems="center">
             <Button
-              colorScheme="green"
+              colorScheme={data?.cartItems?.length > 0 ? "green" : "coolGray"}
+              isDisabled={data?.cartItems?.length === 0}
               shadow={5}
               onPress={() => setIsCheckOutOpen(true)}
               _text={{
@@ -161,8 +162,11 @@ export function Cart(props: Props) {
               children="Cancel"
             />
             <Button
-              colorScheme="green"
+              colorScheme={data?.cartItems?.length > 0 ? "green" : "coolGray"}
+              isDisabled={submitting || data?.cartItems?.length === 0}
+              isLoading={submitting}
               onPress={async () => {
+                setSubmitting(true);
                 const query = await CheckoutOrderQuery(mop);
 
                 if (!query.message.includes("Success")) {

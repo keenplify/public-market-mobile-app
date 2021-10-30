@@ -39,7 +39,7 @@ export function NotificationCard({ notification, ...props }: Props) {
               product: { id: notification.referencedId },
             });
         }}
-        onLongPress={onOpen}
+        // onLongPress={onOpen}
       >
         <Flex>
           <Flex

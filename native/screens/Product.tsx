@@ -145,7 +145,7 @@ export function __ProductViewer(props: MainProductTabProps) {
             renderItem={({ item }) => (
               <Box shadow={3} bgColor="rgb(255,255,255)" key={item.thumbUrl}>
                 <Image
-                  source={serveImageURI(item.thumbUrl)}
+                  source={serveImageURI(item.id)}
                   alt="Preview"
                   w="100%"
                   style={{ aspectRatio: 1 }}

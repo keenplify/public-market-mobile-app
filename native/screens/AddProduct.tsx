@@ -147,7 +147,7 @@ export function AddProduct(props: Props) {
                     return (
                       <Box shadow={3} bgColor="rgb(255,255,255)" key={index}>
                         <Image
-                          source={serveImageURI(item.thumbUrl)}
+                          source={serveImageURI(item.id)}
                           alt="Preview"
                           w="100%"
                           style={{

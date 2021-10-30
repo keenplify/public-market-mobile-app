@@ -19,12 +19,6 @@ import { ProductViewer } from "./screens/Product";
 import { SellerDashboard } from "./screens/SellerDashboard";
 import { RegisterComponent } from "./screens/Register";
 import { AddressForm } from "./screens/AddressForm";
-import axios from "axios";
-import { Settings } from "./screens/Settings";
-import { AddRating } from "./screens/AddRating";
-import { useSocket } from "./helpers/auth";
-import { SocketContext } from "./helpers/MessagesContext";
-import { SearchContext } from "./helpers/SearchContext";
 import { useDebounce } from "rooks";
 
 LogBox.ignoreLogs(["Setting a timer", "contrast ratio"]);
@@ -34,14 +28,13 @@ const queryClient = new QueryClient();
 
 export default function App() {
   const [keyword, setKeyword] = useState("");
-  const setDebouncedKeyword = useDebounce(setKeyword, 1000);
 
   return (
     <NativeBaseProvider>
       <QueryClientProvider client={queryClient}>
         <SafeAreaProvider>
           <NavigationContainer>
-            <RootStack.Navigator initialRouteName="Home">
+            <RootStack.Navigator initialRouteName="Splash">
               <RootStack.Screen
                 name="Home"
                 component={HomeComponent}
@@ -68,7 +61,7 @@ export default function App() {
                   header: (props) => (
                     <CustomerHeader
                       keyword={keyword}
-                      setKeyword={setDebouncedKeyword}
+                      setKeyword={setKeyword}
                       {...props}
                     />
                   ),
@@ -89,7 +82,7 @@ export default function App() {
                 component={AddressForm}
                 options={{ title: "Address Manager" }}
               />
-              <RootStack.Screen name="Settings" component={Settings} />
+              {/* <RootStack.Screen name="Settings" component={Settings} /> */}
               <RootStack.Screen name="Product" component={ProductViewer} />
             </RootStack.Navigator>
           </NavigationContainer>

@@ -58,7 +58,8 @@ export function SubOrderComponent({ subOrder, refetch, ...props }: Props) {
             {subOrder.product?.images && subOrder.product.images[0] ? (
               <Flex>
                 <Image
-                  source={serveImageURI(subOrder.product.images[0].url)}
+                  key={`${subOrder.product.id}-preview`}
+                  source={serveImageURI(subOrder.product.images[0].id)}
                   alt="Preview"
                   style={{ aspectRatio: 1, width: 52 }}
                   borderRadius="md"
@@ -83,7 +84,7 @@ export function SubOrderComponent({ subOrder, refetch, ...props }: Props) {
               x{subOrder.quantity} - {subOrder.status}
             </Text>
           </Flex>
-          <Flex ml="auto">
+          <Flex ml="auto" flexDirection="column-reverse">
             <Badge variant="solid">{`created ${timeago}`}</Badge>
           </Flex>
         </Flex>

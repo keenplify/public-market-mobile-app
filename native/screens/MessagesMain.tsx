@@ -1,9 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import { Flex, ScrollView, Text } from "native-base";
-import { Message, User } from "../helpers/types";
-import { useSocketContext } from "../helpers/MessagesContext";
-import { Socket } from "socket.io-client";
-import { CustomerTabParamList, Grouped } from "./CustomerDashboard";
+import { CustomerTabParamList } from "./CustomerDashboard";
 import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
 import { RoomCard } from "../components/RoomCard";
 import { useInfiniteQuery, useQuery } from "react-query";
@@ -11,11 +8,9 @@ import { getAllMessagesQuery } from "../queries/messages/all";
 import { RefreshControl } from "react-native";
 import { useUserQuery } from "../helpers/auth";
 
-interface Props extends BottomTabScreenProps<CustomerTabParamList, "Messages"> {
-  socket: Socket;
-}
-
-export function MessagesMain({ socket, ...props }: Props) {
+export function MessagesMain(
+  props: BottomTabScreenProps<CustomerTabParamList, "Messages">
+) {
   const { data: user } = useUserQuery();
   const { data, isFetching, refetch } = useQuery(
     "messages_main",

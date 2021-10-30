@@ -1,8 +1,7 @@
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { RootStackParamList } from "../App";
-import { useAuth, useSocket, useUserQuery } from "../helpers/auth";
 import { HomeSellerTab } from "../seller-tabs/Home";
 import { Feather, FontAwesome } from "@expo/vector-icons";
 import { ProfileTab } from "../components/Profile";
@@ -14,14 +13,19 @@ import { MessagesMain } from "./MessagesMain";
 import { MessagesRoom } from "./MessagesRoom";
 import { NotificationsTab } from "./Notifications";
 import { Box, Flex } from "native-base";
+import { useUserQuery } from "../helpers/auth";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Customer Dashboard">;
 
 const Tab = createBottomTabNavigator<SellerTabParamList>();
 
-export function SellerDashboard(props: Props) {
-  const [socketvals] = useState(useSocket());
-  const { messages, socket } = socketvals;
+export function SellerDashboard({ navigation, route }: Props) {
+  const query = useUserQuery();
+
+  useEffect(() => {
+    if (query?.data?.user?.type === "CUSTOMER")
+      navigation.replace("Customer Dashboard");
+  }, [query]);
 
   return (
     <Tab.Navigator>
@@ -61,11 +65,11 @@ export function SellerDashboard(props: Props) {
       />
 
       <Tab.Screen name="Messages" options={{ tabBarButton: () => null }}>
-        {(props) => <MessagesMain socket={socket} {...props} />}
+        {(props) => <MessagesMain {...props} />}
       </Tab.Screen>
 
       <Tab.Screen name="Conversation" options={{ tabBarButton: () => null }}>
-        {(props) => <MessagesRoom socket={socket} {...props} />}
+        {(props) => <MessagesRoom {...props} />}
       </Tab.Screen>
     </Tab.Navigator>
   );

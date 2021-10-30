@@ -5,7 +5,7 @@ import { RefreshControl } from "react-native";
 import { useInfiniteQuery } from "react-query";
 import { RootStackParamList } from "../App";
 import { NotificationCard } from "../components/NotificationCard";
-import { isCloseToBottom } from "../components/ProductsLayout";
+import { isCloseToBottom } from "../components/TrueProductLayout";
 import { useRefetchOnFocus } from "../helpers/useRefetchOnFocus";
 import { NotificationsPaginateQuery } from "../queries/notifications/cursorpagination";
 import { CustomerTabParamList } from "./CustomerDashboard";

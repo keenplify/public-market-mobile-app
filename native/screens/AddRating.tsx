@@ -43,9 +43,8 @@ export function AddRating({ navigation, route }: Props) {
   );
   const toast = useToast();
   const [deletedImages, setDeletedImages] = useState<IImage[]>([]);
-
+  const [submitting, setSubmitting] = useState(false);
   const handleUpload = (image: IImage) => {
-    console.log(image);
     setImages([...images, image]);
   };
 
@@ -59,7 +58,7 @@ export function AddRating({ navigation, route }: Props) {
                 {route.params.product?.images &&
                 route.params.product?.images[0] ? (
                   <Image
-                    source={serveImageURI(data.data.product.images[0].url)}
+                    source={serveImageURI(data.data.product.images[0].id)}
                     alt="Preview"
                     style={{ aspectRatio: 1, width: 62 }}
                     borderRadius="md"
@@ -91,6 +90,9 @@ export function AddRating({ navigation, route }: Props) {
           }}
           validationSchema={schema}
           onSubmit={async (values, status) => {
+            if (submitting) return;
+            setSubmitting(true);
+
             const imageIds = images.map((image) => image.id);
 
             if (route?.name === "Edit Rating") {
@@ -130,7 +132,7 @@ export function AddRating({ navigation, route }: Props) {
                 return status.setStatus("Unable to create rating.");
 
               //@ts-ignore
-              return navigation.navigate("Home", {
+              return navigation.navigate("Customer Home", {
                 screen: "Product",
                 params: { product: data.data.product, screen: "Ratings" },
               });
@@ -160,7 +162,7 @@ export function AddRating({ navigation, route }: Props) {
                 {images.map((image, key) => (
                   <Image
                     key={key}
-                    source={serveImageURI(image.url)}
+                    source={serveImageURI(image.id)}
                     w={16}
                     style={{
                       aspectRatio: 1,
@@ -186,8 +188,8 @@ export function AddRating({ navigation, route }: Props) {
               <Flex>
                 <Button
                   onPress={formik.submitForm}
-                  disabled={formik.isSubmitting || !data}
-                  isLoading={formik.isSubmitting || !data}
+                  disabled={submitting || formik.isSubmitting || !data}
+                  isLoading={submitting || formik.isSubmitting || !data}
                   colorScheme="green"
                 >
                   Submit

@@ -82,7 +82,7 @@ export function RegisterComponent(props: Props) {
           } else {
             setToken(result.token);
             toast.show({ description: "Register Successful." });
-            props.navigation.goBack();
+            props.navigation.navigate("Splash");
           }
         }}
         validationSchema={schema}

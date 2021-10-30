@@ -15,9 +15,9 @@ import { SellerSubOrdersCursorPaginateQuery } from "../queries/orders/sellersubo
 import { SubOrderComponent } from "../components/SubOrder";
 import { AntDesign } from "@expo/vector-icons";
 import { RefreshControl } from "react-native";
-import { isCloseToBottom } from "../components/ProductsLayout";
 import { RootStackParamList } from "../App";
 import { useRefetchOnFocus } from "../helpers/useRefetchOnFocus";
+import { isCloseToBottom } from "../components/TrueProductLayout";
 
 export type SellerOrdersProps = NativeStackScreenProps<
   ProductTabParamList & RootStackParamList,
@@ -56,29 +56,34 @@ export function SellerOrders(props: SellerOrdersProps) {
             {isFetched ? (
               data?.pages.map((_data, key1) => (
                 <Fragment key={key1}>
-                  {_data.count > 0 ? (
-                    _data?.subOrders
-                      ?.filter((subOrder) =>
-                        subOrder.status === "DELIVERED" ||
-                        subOrder.status === "DECLINED" ||
-                        subOrder.status === "CANCELLED"
-                          ? isShowingDelivered
-                          : true
-                      )
-                      .map((subOrders, key2) => (
-                        <SubOrderComponent
-                          subOrder={subOrders}
-                          key={key2}
-                          refetch={refetch}
-                          {...props}
-                        />
-                      ))
-                  ) : (
-                    <Flex alignItems="center" flexGrow={1} my={8} key={key1}>
-                      <AntDesign name="meh" size={64} color="black" />
-                      <Text mt={4}>No suborders found.</Text>
-                    </Flex>
-                  )}
+                  {_data.count > 0
+                    ? _data?.subOrders
+                        ?.filter((subOrder) =>
+                          subOrder.status === "DELIVERED" ||
+                          subOrder.status === "DECLINED" ||
+                          subOrder.status === "CANCELLED"
+                            ? isShowingDelivered
+                            : true
+                        )
+                        .map((subOrders, key2) => (
+                          <SubOrderComponent
+                            subOrder={subOrders}
+                            key={key2}
+                            refetch={refetch}
+                            {...props}
+                          />
+                        ))
+                    : key1 === 0 && (
+                        <Flex
+                          alignItems="center"
+                          flexGrow={1}
+                          my={8}
+                          key={key1}
+                        >
+                          <AntDesign name="meh" size={64} color="black" />
+                          <Text mt={4}>No suborders found.</Text>
+                        </Flex>
+                      )}
                 </Fragment>
               ))
             ) : (

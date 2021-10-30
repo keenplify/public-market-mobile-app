@@ -8,7 +8,7 @@ import { NotificationsTab } from "./Notifications";
 import { CustomerOrdersComponent } from "../customer-tabs/CustomerOrders";
 import { ProfileTab } from "../components/Profile";
 import { Cart } from "../customer-tabs/Cart";
-import { useSocket, useUserQuery } from "../helpers/auth";
+import { useUserQuery } from "../helpers/auth";
 import { Button, Flex, Heading, Text } from "native-base";
 import { useRefetchOnFocus } from "../helpers/useRefetchOnFocus";
 import { Message, Product, Rating, User } from "../helpers/types";
@@ -27,10 +27,10 @@ interface Props
 
 export function CustomerDashboard({ keyword, navigation }: Props) {
   const { data, isSuccess, refetch, ...query } = useUserQuery();
-  const [socketvals] = useState(useSocket());
-  const { messages, socket } = socketvals;
 
-  useRefetchOnFocus(refetch);
+  useEffect(() => {
+    if (data?.user?.type === "SELLER") navigation.replace("Seller Dashboard");
+  }, [query, data, isSuccess, refetch]);
 
   const notice = (
     <Flex bgColor="primary.200" p={3} shadow={3}>
@@ -107,14 +107,14 @@ export function CustomerDashboard({ keyword, navigation }: Props) {
         />
 
         <Tab.Screen name="Messages" options={{ tabBarButton: () => null }}>
-          {(props) => <MessagesMain socket={socket} {...props} />}
+          {(props) => <MessagesMain {...props} />}
         </Tab.Screen>
 
         <Tab.Screen
           name="Conversation"
           options={{ tabBarButton: () => null, headerShown: false }}
         >
-          {(props) => <MessagesRoom socket={socket} {...props} />}
+          {(props) => <MessagesRoom {...props} />}
         </Tab.Screen>
         <Tab.Screen
           name="Search"
@@ -147,18 +147,4 @@ export type CustomerTabParamList = {
   Search: {
     keyword?: string;
   };
-};
-
-type GroupBy<T> = (xs: T[], key: keyof T) => Grouped<T>;
-
-export type Grouped<T> = {
-  [key: string]: T[];
-};
-
-const groupBy: GroupBy<Message> = function (xs, key) {
-  return xs.reduce(function (rv, x) {
-    //@ts-ignore
-    (rv[x[key]] = rv[x[key]] || []).push(x);
-    return rv;
-  }, {});
 };

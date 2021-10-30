@@ -20,6 +20,6 @@ export const LoginQuery = async (email: string, password: string) => {
     return response.data;
   } catch (error) {
     console.log(error);
-    return { message: "Cannot connect to the server", error };
+    return { message: "Cannot connect to the server", error, token: undefined };
   }
 };
