@@ -26,7 +26,7 @@ export function SplashComponent(props: Props) {
         return props.navigation.replace("Seller Dashboard");
     };
 
-    fn().then();
+    return fn().then();
   };
 
   useRefetchOnFocus(logic);

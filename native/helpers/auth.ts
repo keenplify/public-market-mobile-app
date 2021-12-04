@@ -1,7 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useToast } from "native-base";
 import { useEffect, useState } from "react";
-import { useQuery } from "react-query";
+import { useQuery, useQueryClient } from "react-query";
 import { io, Socket } from "socket.io-client";
 import { MeQuery } from "../queries/users/me";
 import { SERVER_API, SERVER_SOCKET } from "./string";
@@ -9,6 +9,7 @@ import { MessageReport, Message } from "./types";
 import { useRefetchOnFocus } from "./useRefetchOnFocus";
 
 export const useAuth = (props?: any) => {
+  const queryClient = useQueryClient();
   const query = useQuery("check", async () => await MeQuery());
 
   useEffect(() => {
@@ -23,11 +24,8 @@ export const useAuth = (props?: any) => {
 
   const logout = () => {
     AsyncStorage.removeItem("token").then(() => {
-      query.refetch().then(() =>
-        setTimeout(() => {
-          props?.navigation.replace("Splash");
-        }, 1000)
-      );
+      queryClient.clear();
+      props?.navigation.replace("Splash");
     });
   };
 
