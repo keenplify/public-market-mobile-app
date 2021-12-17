@@ -1,6 +1,6 @@
 export default {
   name: "Public Market",
-  version: "1.0.1",
+  version: "1.0.2",
   extra: {
     SERVER_API: "https://pmma.herokuapp.com",
     SERVER_API_DEV: "http://192.168.254.100:3000",
