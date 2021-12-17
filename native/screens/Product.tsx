@@ -38,6 +38,7 @@ import { AddProduct } from "./AddProduct";
 import { Image as IImage, Product } from "../helpers/types";
 import { AddToCart } from "../components/AddToCartProduct";
 import { ProductRatings } from "./ProductRatings";
+import { ProductCard } from "../components/ProductCard";
 
 const Tab = createBottomTabNavigator<ProductTabParamList>();
 
@@ -210,6 +211,31 @@ export function __ProductViewer(props: MainProductTabProps) {
               <Spinner />
             </Flex>
           )}
+        </VStack>
+      </Flex>
+      <Flex p={3} m={2}>
+        <VStack>
+          <Heading fontSize="lg">Product Recommendations</Heading>
+          <Flex flexDirection="column" flexGrow={1} mx={1}>
+            <Flex flexWrap="wrap" flexDirection="row" w="100%">
+              {data?.data?.reccommendedProducts.length > 0 ? (
+                data.data.reccommendedProducts.map(
+                  (recommendedProduct, key) => (
+                    <ProductCard
+                      product={recommendedProduct}
+                      key={key}
+                      {...props}
+                    />
+                  )
+                )
+              ) : (
+                <Flex alignItems="center" flexGrow={1} my={8}>
+                  <AntDesign name="meh" size={64} color="black" />
+                  <Text mt={4}>No recommendations found.</Text>
+                </Flex>
+              )}
+            </Flex>
+          </Flex>
         </VStack>
       </Flex>
     </ScrollView>

@@ -6,6 +6,7 @@ interface GetProductResponse {
   message: string;
   product: Product;
   ratingsAverage: number;
+  reccommendedProducts: Product[];
 }
 
 export const GetProductQuery = async (id: number) => {

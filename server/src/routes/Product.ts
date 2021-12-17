@@ -1,4 +1,5 @@
 import { Image, Prisma, PrismaClient, Product, User } from ".prisma/client";
+import { EXCLUDED_KEYWORDS } from "@shared/excludedkeywords";
 import {
   authenticate,
   isCustomer,
@@ -248,7 +249,56 @@ router.get(
     const sum = ratings.reduce((a, b) => a + b.rating, 0);
     const avg = sum / ratings.length || 0;
 
-    return res.send({ message: "Success", product, ratingsAverage: avg });
+    let keywords: string[] = [];
+    product.name.split(" ").forEach((name) => {
+      const keyword = name.replace(/[^a-zA-Z]+/g, "");
+      if (!keywords.includes(keyword)) keywords.push(keyword);
+    });
+
+    product.description.split(" ").forEach((name) => {
+      const keyword = name.replace(/[^a-zA-Z]+/g, "");
+      if (!keywords.includes(keyword) && !EXCLUDED_KEYWORDS.includes(keyword))
+        keywords.push(keyword);
+    });
+
+    // Recommendations
+    const reccommendedProducts = await prisma.product.findMany({
+      where: {
+        AND: {
+          OR: [
+            ...keywords.map((keyword) => {
+              return {
+                name: {
+                  contains: keyword,
+                },
+              };
+            }),
+            ...keywords.map((keyword) => {
+              return {
+                description: {
+                  contains: keyword,
+                },
+              };
+            }),
+          ],
+          NOT: {
+            id: product.id,
+          },
+        },
+      },
+      include: {
+        ratings: true,
+        images: true,
+      },
+    });
+
+    return res.send({
+      message: "Success",
+      product,
+      reccommendedProducts,
+      keywords,
+      ratingsAverage: avg,
+    });
   }
 );
 

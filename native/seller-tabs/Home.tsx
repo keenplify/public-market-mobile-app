@@ -3,19 +3,8 @@ import {
   createNativeStackNavigator,
   NativeStackScreenProps,
 } from "@react-navigation/native-stack";
-import {
-  Box,
-  Button,
-  Flex,
-  Heading,
-  ScrollView,
-  Text,
-  VStack,
-  Fab,
-  Icon,
-} from "native-base";
+import { Button, Icon } from "native-base";
 import React from "react";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { ProductsLayout } from "../components/ProductsLayout";
 import { Product } from "../helpers/types";
 import { ProductViewer } from "../screens/Product";
